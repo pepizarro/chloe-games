@@ -22,7 +22,10 @@ export function PlayerGate({ children }: { children: React.ReactNode }) {
       <div className="row" style={{ justifyContent: "space-between", marginBottom: 16 }}>
         <Link href="/">⌂ lobby</Link>
         <span>
-          {me} <button className="px" style={{ padding: "2px 6px" }} onClick={() => setPlayer(null)}>switch</button>
+          {me}
+          {process.env.NODE_ENV === "development" && (
+            <button className="px" style={{ padding: "2px 6px" }} onClick={() => setPlayer(null)}>switch</button>
+          )}
         </span>
       </div>
       {children}

@@ -8,8 +8,8 @@
   --board: #3b5dc9;
   --px: 4px;
   /* balatro palette */
-  --felt: #1f6e46;
-  --felt-dk: #12402a;
+  --felt: #14472e;
+  --felt-dk: #0b2a1b;
   --slate: #2c3638;
   --slate-dk: #171f21;
   --blue: #0b9bff;
@@ -42,10 +42,10 @@ body {
 body::before {
   content: ""; position: fixed; inset: -30%; z-index: -1;
   background:
-    radial-gradient(45% 55% at 28% 32%, #2f9a63 0, #0000 70%),
-    radial-gradient(40% 45% at 74% 62%, #0d3d25 0, #0000 70%),
-    radial-gradient(32% 38% at 58% 88%, #35a86b 0, #0000 70%),
-    radial-gradient(30% 30% at 12% 80%, #0d3d25 0, #0000 70%),
+    radial-gradient(45% 55% at 28% 32%, #1f6b45 0, #0000 70%),
+    radial-gradient(40% 45% at 74% 62%, #07211a 0, #0000 70%),
+    radial-gradient(32% 38% at 58% 88%, #22704a 0, #0000 70%),
+    radial-gradient(30% 30% at 12% 80%, #07211a 0, #0000 70%),
     var(--felt);
   animation: swirl 28s ease-in-out infinite alternate;
 }

@@ -5,45 +5,56 @@ import { supabase, type Game } from "@/lib/supabase";
 import { usePlayer } from "@/lib/player";
 import { GAMES, type GameType, type Move } from "@/lib/games";
 
+const REPLAY_DELAY = 900; // ms the board sits at the pre-move state before the opponent's move animates in
+
 export default function Room() {
   const { id } = useParams<{ id: string }>();
   const me = usePlayer()!;
   const [game, setGame] = useState<Game | null>(null);
 
   useEffect(() => {
-    supabase.from("games").select().eq("id", id).single().then(({ data }) => setGame(data));
+    let timer: ReturnType<typeof setTimeout>;
+    supabase.from("games").select().eq("id", id).single().then(({ data }) => {
+      if (!data) return setGame(null);
+      if (data.prev && data.last_by && data.last_by !== me) {
+        // show the board as it was before their move, then let the board's own diff animation play it
+        setGame({ ...data, state: data.prev, turn: data.last_by, winner: null });
+        timer = setTimeout(() => setGame(data), REPLAY_DELAY);
+      } else setGame(data);
+    });
     const ch = supabase
       .channel(`game:${id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "games", filter: `id=eq.${id}` }, (p) =>
         setGame(p.new as Game),
       )
       .subscribe();
-    return () => void supabase.removeChannel(ch);
-  }, [id]);
+    return () => (clearTimeout(timer), void supabase.removeChannel(ch));
+  }, [id, me]);
 
   async function play(m: Move<unknown>) {
     if (!game) return;
-    setGame({ ...game, ...m }); // optimistic
+    const row = { ...m, prev: game.state, last_by: me };
+    setGame({ ...game, ...row }); // optimistic
     // .eq("turn", me) makes a stale/double move a no-op
-    const { data, error } = await supabase.from("games").update(m).eq("id", id).eq("turn", me).select().single();
+    const { data, error } = await supabase.from("games").update(row).eq("id", id).eq("turn", me).select().single();
     if (error || !data) {
       const { data: fresh } = await supabase.from("games").select().eq("id", id).single();
       setGame(fresh);
     }
   }
 
-  if (!game) return <p>loading…</p>;
+  if (!game) return <p className="panel">shuffling…</p>;
   const def = GAMES[game.type as GameType];
-  if (!def) return <p>unknown game: {game.type}</p>;
+  if (!def) return <p className="panel">unknown game: {game.type}</p>;
 
-  const status = game.winner
-    ? game.winner === "draw" ? "draw!" : game.winner === me ? "you won!" : `${game.winner} won`
-    : game.turn === me ? "your turn" : `waiting for ${game.turn}…`;
+  const [status, tone] = game.winner
+    ? game.winner === "draw" ? ["draw!", "gold"] : game.winner === me ? ["you won!", "gold"] : [`${game.winner} won`, "red"]
+    : game.turn === me ? ["your turn", "blue"] : [`waiting for ${game.turn}…`, "dim"];
 
   return (
     <>
-      <h1>{def.name}</h1>
-      <p className="badge">{status}</p>
+      <div className="plaque">{def.name}</div>
+      <div key={status} className={`status ${tone}`}>{status}</div>
       <def.Board game={game as never} me={me} play={play} />
     </>
   );

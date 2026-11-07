@@ -7,19 +7,27 @@ const init = (): State => ({ pits: Array.from({ length: 14 }, (_, i) => (STORE.i
 const side = (i: number) => (i < 7 ? 0 : 1);
 export const ownPits = (s: number) => [0, 1, 2, 3, 4, 5].map((i) => i + s * 7);
 
+/** Pits that receive a stone, in order, when sowing from `i` (skips the opponent's store). */
+function path(pits: number[], i: number): number[] {
+  const out: number[] = [];
+  const s = side(i);
+  for (let j = i, n = pits[i]; n > 0; ) {
+    j = (j + 1) % 14;
+    if (j === STORE[1 - s]) continue;
+    out.push(j);
+    n--;
+  }
+  return out;
+}
+
 /** Sow from pit `i` for player `s`. Returns new pits and whether the player moves again, or null if illegal. */
 function move(pits: number[], i: number, s: number): { pits: number[]; again: boolean } | null {
   if (side(i) !== s || STORE.includes(i) || pits[i] === 0) return null;
   const p = pits.slice();
-  let n = p[i];
+  const route = path(pits, i);
   p[i] = 0;
-  let j = i;
-  while (n > 0) {
-    j = (j + 1) % 14;
-    if (j === STORE[1 - s]) continue; // skip opponent's store
-    p[j]++;
-    n--;
-  }
+  for (const k of route) p[k]++;
+  const j = route.at(-1)!;
   const again = j === STORE[s];
   const opp = 12 - j;
   if (!again && side(j) === s && p[j] === 1 && p[opp] > 0) {
@@ -43,4 +51,4 @@ function winner(pits: number[]): 0 | 1 | "draw" | null {
   return a === b ? "draw" : a > b ? 0 : 1;
 }
 
-export const mancala = { init, move, winner };
+export const mancala = { init, path, move, winner };

@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import { supabase, type Game } from "@/lib/supabase";
 import { other, usePlayer } from "@/lib/player";
 import { GAMES, type GameType } from "@/lib/games";
+import { Chip } from "@/components/PlayerGate";
+
+const GLYPH: Record<string, [string, string]> = { connect4: ["red", "4"], mancala: ["gold", "♦"] };
 
 export default function Lobby() {
   const me = usePlayer()!;
@@ -33,20 +36,28 @@ export default function Lobby() {
   }
 
   const done = games.filter((g) => g.winner);
+  const glyph = (t: string) => <Chip tone={GLYPH[t]?.[0] ?? "blue"} glyph={GLYPH[t]?.[1] ?? "?"} />;
 
   return (
     <>
-      <h1>hi {me}</h1>
+      <div className="plaque">hi {me}</div>
       <div className="list">
         {(Object.keys(GAMES) as GameType[]).map((t) => {
           const g = games.find((x) => x.type === t && !x.winner);
-          if (!g) return <button key={t} className="px" onClick={() => create(t)}>+ new {GAMES[t].name}</button>;
+          if (!g)
+            return (
+              <button key={t} className="card panel" onClick={() => create(t)}>
+                {glyph(t)}
+                <span>{GAMES[t].name}<small>deal a new one</small></span>
+                <b className="tag blue">+ new</b>
+              </button>
+            );
           const mine = g.turn === me;
           return (
-            <Link key={t} href={`/game/${g.id}`} className={`px ${mine ? "mine" : "waiting"}`}>
-              {GAMES[t].name}
-              <br />
-              <span className="badge">{mine ? "▶ your turn" : `waiting for ${g.turn}`}</span>
+            <Link key={t} href={`/game/${g.id}`} className={`card panel ${mine ? "live" : "waiting"}`}>
+              {glyph(t)}
+              <span>{GAMES[t].name}<small>{!mine ? `waiting for ${g.turn}` : g.last_by && g.last_by !== me ? "they played, go!" : "your move"}</small></span>
+              <b className={`tag ${mine ? "blue" : "dim"}`}>{mine ? "your turn" : "…"}</b>
             </Link>
           );
         })}
@@ -57,10 +68,10 @@ export default function Lobby() {
           <h2>finished</h2>
           <div className="list">
             {done.map((g) => (
-              <Link key={g.id} href={`/game/${g.id}`} className="px waiting">
-                {GAMES[g.type as GameType]?.name ?? g.type}
-                <br />
-                <span className="badge">{g.winner === "draw" ? "draw" : `${g.winner} won`}</span>
+              <Link key={g.id} href={`/game/${g.id}`} className="card panel waiting">
+                {glyph(g.type)}
+                <span>{GAMES[g.type as GameType]?.name ?? g.type}</span>
+                <b className={`tag ${g.winner === me ? "gold" : "dim"}`}>{g.winner === "draw" ? "draw" : `${g.winner} won`}</b>
               </Link>
             ))}
           </div>

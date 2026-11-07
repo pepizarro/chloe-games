@@ -12,6 +12,8 @@ export type Game<S = unknown> = {
   turn: string | null;
   winner: string | null;
   state: S;
+  prev: S | null;      // state before the last move
+  last_by: string | null;
   created_at: string;
   updated_at: string;
 };

@@ -2,29 +2,37 @@
 import Link from "next/link";
 import { PLAYERS, setPlayer, usePlayer } from "@/lib/player";
 
+export const CHIP: Record<string, string> = { pedro: "blue", chloe: "red" };
+
+export function Chip({ tone, glyph }: { tone: string; glyph: string }) {
+  return <i className={`chip ${tone}`}>{glyph}</i>;
+}
+
 export function PlayerGate({ children }: { children: React.ReactNode }) {
   const me = usePlayer();
   if (!me)
     return (
       <div className="gate">
-        <div className="px">
-          <p>who are you?</p>
-          <div className="row">
-            {PLAYERS.map((p) => (
-              <button key={p} className="px" onClick={() => setPlayer(p)}>{p}</button>
-            ))}
-          </div>
+        <div className="plaque">who&apos;s playing?</div>
+        <div className="row" style={{ justifyContent: "center" }}>
+          {PLAYERS.map((p) => (
+            <button key={p} className="pick" onClick={() => setPlayer(p)}>
+              <Chip tone={CHIP[p]} glyph={p[0].toUpperCase()} />
+              {p}
+            </button>
+          ))}
         </div>
       </div>
     );
   return (
     <main>
-      <div className="row" style={{ justifyContent: "space-between", marginBottom: 16 }}>
-        <Link href="/">⌂ lobby</Link>
-        <span>
+      <div className="topbar panel">
+        <Link href="/" className="btn gold tag">◂ casino</Link>
+        <span className="row" style={{ gap: 6 }}>
+          <Chip tone={CHIP[me]} glyph={me[0].toUpperCase()} />
           {me}
           {process.env.NODE_ENV === "development" && (
-            <button className="px" style={{ padding: "2px 6px" }} onClick={() => setPlayer(null)}>switch</button>
+            <button className="btn dim" style={{ padding: "4px 8px", fontSize: 9 }} onClick={() => setPlayer(null)}>switch</button>
           )}
         </span>
       </div>

@@ -1,69 +1,70 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { supabase, type Game } from "@/lib/supabase";
+import { other, usePlayer } from "@/lib/player";
+import { GAMES, type GameType } from "@/lib/games";
 
-export default function Home() {
+export default function Lobby() {
+  const me = usePlayer()!;
+  const router = useRouter();
+  const [games, setGames] = useState<Game[]>([]);
+
+  useEffect(() => {
+    const load = () =>
+      supabase.from("games").select().order("updated_at", { ascending: false }).then(({ data }) => setGames(data ?? []));
+    load();
+    const ch = supabase
+      .channel("lobby")
+      .on("postgres_changes", { event: "*", schema: "public", table: "games" }, load)
+      .subscribe();
+    return () => void supabase.removeChannel(ch);
+  }, []);
+
+  async function create(type: GameType) {
+    const { data, error } = await supabase
+      .from("games")
+      .insert({ type, players: [me, other(me)], turn: me, state: GAMES[type].init() })
+      .select()
+      .single();
+    if (error) return alert(error.message);
+    router.push(`/game/${data.id}`);
+  }
+
+  const active = games.filter((g) => !g.winner);
+  const done = games.filter((g) => g.winner);
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <>
+      <h1>hi {me}</h1>
+      <div className="row">
+        {(Object.keys(GAMES) as GameType[]).map((t) => (
+          <button key={t} className="px" onClick={() => create(t)}>+ new {GAMES[t].name}</button>
+        ))}
+      </div>
+
+      <h2>playing</h2>
+      <GameList games={active} me={me} />
+      <h2>finished</h2>
+      <GameList games={done} me={me} />
+    </>
+  );
+}
+
+function GameList({ games, me }: { games: Game[]; me: string }) {
+  if (!games.length) return <p>nothing here</p>;
+  return (
+    <div className="list">
+      {games.map((g) => (
+        <Link key={g.id} href={`/game/${g.id}`} className="px">
+          {GAMES[g.type as GameType]?.name ?? g.type} · {new Date(g.updated_at).toLocaleString()}
+          <br />
+          <span className="badge">
+            {g.winner ? (g.winner === "draw" ? "draw" : `${g.winner} won`) : g.turn === me ? "▶ your turn" : `waiting for ${g.turn}`}
+          </span>
+        </Link>
+      ))}
     </div>
   );
 }

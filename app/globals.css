@@ -38,18 +38,27 @@ body {
   font-family: var(--font-pixel), monospace; font-size: 12px; line-height: 1.8; image-rendering: pixelated;
   overflow-x: hidden; -webkit-tap-highlight-color: transparent;
 }
-/* swirling felt */
-body::before {
-  content: ""; position: fixed; inset: -30%; z-index: -1;
-  background:
-    radial-gradient(45% 55% at 28% 32%, #1f6b45 0, #0000 70%),
-    radial-gradient(40% 45% at 74% 62%, #07211a 0, #0000 70%),
-    radial-gradient(32% 38% at 58% 88%, #22704a 0, #0000 70%),
-    radial-gradient(30% 30% at 12% 80%, #07211a 0, #0000 70%),
-    var(--felt);
-  animation: swirl 28s ease-in-out infinite alternate;
+/* swirling felt: two blob layers drifting on different clocks */
+body::before, body::after {
+  content: ""; position: fixed; inset: -25%; z-index: -1; pointer-events: none;
+  will-change: transform;
 }
-@keyframes swirl { to { transform: rotate(14deg) scale(1.12) translate(3%, -4%); } }
+body::before {
+  background:
+    radial-gradient(40% 50% at 30% 35%, #1f6b45 0, #0000 70%),
+    radial-gradient(35% 40% at 75% 65%, #06201a 0, #0000 70%),
+    var(--felt);
+  animation: drift1 13s ease-in-out infinite alternate;
+}
+body::after {
+  background:
+    radial-gradient(30% 35% at 60% 85%, #22704a 0, #0000 70%),
+    radial-gradient(28% 30% at 15% 80%, #06201a 0, #0000 70%),
+    radial-gradient(25% 30% at 80% 15%, #1a5c3c 0, #0000 70%);
+  animation: drift2 9s ease-in-out infinite alternate;
+}
+@keyframes drift1 { to { transform: translate(-6%, 5%) rotate(-7deg) scale(1.12); } }
+@keyframes drift2 { to { transform: translate(7%, -6%) rotate(9deg) scale(1.15); } }
 
 a { color: var(--ink); text-decoration: none; }
 main { max-width: 480px; margin: 0 auto; padding: 12px 16px 32px; }
@@ -120,7 +129,7 @@ h2 { font-size: 10px; margin: 28px 0 8px; opacity: .7; text-transform: uppercase
 .pick:active { translate: 0 3px; box-shadow: 0 1px 0 color-mix(in srgb, var(--c), #000 40%); }
 .pick .chip { width: 56px; font-size: 16px; }
 
-@media (prefers-reduced-motion: reduce) { body::before, .status, .tag { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { body::before, body::after, .status, .tag { animation: none !important; } }
 
 /* connect 4 — 10x10 pixel-art circle, reused for holes and pieces */
 .c4 {

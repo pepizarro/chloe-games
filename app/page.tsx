@@ -32,39 +32,40 @@ export default function Lobby() {
     router.push(`/game/${data.id}`);
   }
 
-  const active = games.filter((g) => !g.winner);
   const done = games.filter((g) => g.winner);
 
   return (
     <>
       <h1>hi {me}</h1>
-      <div className="row">
-        {(Object.keys(GAMES) as GameType[]).map((t) => (
-          <button key={t} className="px" onClick={() => create(t)}>+ new {GAMES[t].name}</button>
-        ))}
+      <div className="list">
+        {(Object.keys(GAMES) as GameType[]).map((t) => {
+          const g = games.find((x) => x.type === t && !x.winner);
+          if (!g) return <button key={t} className="px" onClick={() => create(t)}>+ new {GAMES[t].name}</button>;
+          const mine = g.turn === me;
+          return (
+            <Link key={t} href={`/game/${g.id}`} className={`px ${mine ? "mine" : "waiting"}`}>
+              {GAMES[t].name}
+              <br />
+              <span className="badge">{mine ? "▶ your turn" : `waiting for ${g.turn}`}</span>
+            </Link>
+          );
+        })}
       </div>
 
-      <h2>playing</h2>
-      <GameList games={active} me={me} />
-      <h2>finished</h2>
-      <GameList games={done} me={me} />
+      {done.length > 0 && (
+        <>
+          <h2>finished</h2>
+          <div className="list">
+            {done.map((g) => (
+              <Link key={g.id} href={`/game/${g.id}`} className="px waiting">
+                {GAMES[g.type as GameType]?.name ?? g.type}
+                <br />
+                <span className="badge">{g.winner === "draw" ? "draw" : `${g.winner} won`}</span>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
     </>
-  );
-}
-
-function GameList({ games, me }: { games: Game[]; me: string }) {
-  if (!games.length) return <p>nothing here</p>;
-  return (
-    <div className="list">
-      {games.map((g) => (
-        <Link key={g.id} href={`/game/${g.id}`} className="px">
-          {GAMES[g.type as GameType]?.name ?? g.type} · {new Date(g.updated_at).toLocaleString()}
-          <br />
-          <span className="badge">
-            {g.winner ? (g.winner === "draw" ? "draw" : `${g.winner} won`) : g.turn === me ? "▶ your turn" : `waiting for ${g.turn}`}
-          </span>
-        </Link>
-      ))}
-    </div>
   );
 }

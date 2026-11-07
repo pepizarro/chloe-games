@@ -5,17 +5,19 @@ export type State = { board: Cell[] }; // row-major, row 0 = top
 
 const init = (): State => ({ board: Array(COLS * ROWS).fill(null) });
 
+/** Index where a piece dropped in `col` lands, or -1 if full. */
+function landing(board: Cell[], col: number): number {
+  for (let r = ROWS - 1; r >= 0; r--) if (board[r * COLS + col] === null) return r * COLS + col;
+  return -1;
+}
+
 /** Returns new board, or null if column is full. */
 function drop(board: Cell[], col: number, player: string): Cell[] | null {
-  for (let r = ROWS - 1; r >= 0; r--) {
-    const i = r * COLS + col;
-    if (board[i] === null) {
-      const next = board.slice();
-      next[i] = player;
-      return next;
-    }
-  }
-  return null;
+  const i = landing(board, col);
+  if (i < 0) return null;
+  const next = board.slice();
+  next[i] = player;
+  return next;
 }
 
 /** Player name, 'draw', or null if still playing. */
@@ -33,4 +35,4 @@ function winner(board: Cell[]): string | null {
   return board.includes(null) ? null : "draw";
 }
 
-export const connect4 = { init, drop, winner };
+export const connect4 = { init, landing, drop, winner };

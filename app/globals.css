@@ -42,3 +42,11 @@ button.px:disabled { opacity: .5; cursor: default; }
 .c4 button:disabled { cursor: default; }
 .c4 .p0 { background: var(--red); }
 .c4 .p1 { background: var(--yellow); }
+
+/* mancala */
+.mancala { display: grid; grid-template-columns: 56px 1fr 56px; gap: 8px; background: #7a4a2a; padding: 10px; width: fit-content; align-items: stretch; }
+.mancala .store { display: grid; place-items: center; background: #4a2a12; color: var(--accent); font-size: 16px; }
+.mancala .pits { display: grid; grid-template-columns: repeat(6, 48px); gap: 8px; }
+.mancala .pit { width: 48px; height: 48px; border: 0; padding: 0; font: inherit; color: var(--ink); background: #4a2a12; cursor: pointer; }
+.mancala .pit:not(:disabled):hover { background: var(--accent); color: var(--bg); }
+.mancala .pit:disabled { cursor: default; }

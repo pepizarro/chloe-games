@@ -13,8 +13,7 @@
 .pile:disabled, .hcard:disabled { opacity: 1; }
 .empty { display: block; width: 100%; height: 100%; border: 3px dashed #ffffff33; border-radius: 6px; box-sizing: border-box; }
 .n { position: absolute; right: -6px; bottom: -6px; min-width: 18px; padding: 2px 4px; font-size: 8px; font-weight: normal; background: var(--slate-dk); color: #fff; border-radius: 6px; }
-.hot { animation: hot .6s steps(1) infinite; border-radius: 6px; }
-.hot .card { filter: drop-shadow(0 0 0 3px var(--blue)); }
+.hot { border-radius: 6px; background: #0b9bff44; outline: 3px solid var(--blue); outline-offset: 4px; }
 .opp { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 12px 10px 4px; }
 .fan { display: flex; }
 .fan .card { margin-left: calc(var(--cw) * -0.55); transform: scale(.8); transform-origin: bottom; }
@@ -43,7 +42,6 @@
 .rules { margin: 0; padding: 0 0 0 1.2em; text-align: left; font-size: 9px; line-height: 1.9; }
 .rules li + li { margin-top: 4px; }
 @keyframes land { from { transform: translateY(-30px) scale(1.2); opacity: 0; } }
-@keyframes hot { 50% { background: #0b9bff44; } }
 @keyframes shake { 0%, 100% { translate: 0; } 33% { translate: -5px; } 66% { translate: 5px; } }
 @keyframes bob { 50% { transform: translateY(-3px); } }
 @media (prefers-reduced-motion: reduce) { .screen * { animation: none !important; transition: none !important; } }

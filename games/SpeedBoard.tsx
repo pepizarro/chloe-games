@@ -83,12 +83,7 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
   const flip = () => !s.flip[seat] && commit(speed.requestFlip(s, seat), s.v, (f) => speed.requestFlip(f, seat));
 
   const pileCls = (p: number) => `${css.pile} ${(sel !== null && speed.canPlay(s, sel, p)) || over(p) ? css.hot : ""}`;
-  const Pile = ({ cards, up, cls, onClick, at }: { cards: number[]; up: boolean; cls?: string; onClick?: () => void; at?: number }) => (
-    <button ref={at === undefined ? undefined : (el) => void (piles.current[at] = el)} className={cls ?? css.pile} onClick={onClick} disabled={!onClick}>
-      {cards.length ? <img key={up ? cards[cards.length - 1] : cards.length} className={css.card} src={up ? img(cards[cards.length - 1]) : BACK} alt="" draggable={false} /> : <i className={css.empty} />}
-      {cards.length > 1 && <b className={css.n}>{cards.length}</b>}
-    </button>
-  );
+  const setPile = (at: number) => (el: HTMLButtonElement | null) => void (piles.current[at] = el);
 
   return (
     <div className={css.screen}>
@@ -108,8 +103,8 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
 
       <div className={css.table}>
         <Pile cards={s.side[0]} up={false} />
-        <Pile cards={s.center[0]} up={started} cls={pileCls(0)} onClick={() => tapPile(0)} at={0} />
-        <Pile cards={s.center[1]} up={started} cls={pileCls(1)} onClick={() => tapPile(1)} at={1} />
+        <Pile cards={s.center[0]} up={started} cls={pileCls(0)} onClick={() => tapPile(0)} refEl={setPile(0)} />
+        <Pile cards={s.center[1]} up={started} cls={pileCls(1)} onClick={() => tapPile(1)} refEl={setPile(1)} />
         <Pile cards={s.side[1]} up={false} />
       </div>
       {started && !done && (
@@ -175,5 +170,15 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
         </div>
       )}
     </div>
+  );
+}
+
+function Pile({ cards, up, cls, onClick, refEl }: { cards: number[]; up: boolean; cls?: string; onClick?: () => void; refEl?: (el: HTMLButtonElement | null) => void }) {
+  const t = cards[cards.length - 1];
+  return (
+    <button ref={refEl} className={cls ?? css.pile} onClick={onClick} disabled={!onClick}>
+      {cards.length ? <img key={up ? t : cards.length} className={css.card} src={up ? img(t) : BACK} alt="" draggable={false} /> : <i className={css.empty} />}
+      {cards.length > 1 && <b className={css.n}>{cards.length}</b>}
+    </button>
   );
 }

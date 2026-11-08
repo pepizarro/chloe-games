@@ -2,7 +2,11 @@
 const BITMAPS: Record<string, { rows: string[]; fill: string; hi: string; rim?: string }> = {
   heart: { fill: "#fe5f55", hi: "#ffb3ad", rows: [".XX..XX.", "XoXXXXXX", "XXXXXXXX", "XXXXXXXX", ".XXXXXX.", "..XXXX..", "...XX..."] },
   home: { fill: "#fff", hi: "#c8a24c", rows: ["...XX...", "..XXXX..", ".XXXXXX.", "XXXXXXXX", ".XXXXXX.", ".XXooXX.", ".XXooXX."] },
-  spade: { fill: "#15161e", hi: "#4e5a5d", rim: "#dfe6ea", rows: ["...XX...", "..XXXX..", ".XoXXXX.", "XoXXXXXX", "XXXXXXXX", "XXX.XXXX", ".X.XX.X.", "...XX...", "..XXXX.."] },
+  spade: { fill: "#1d2a2a", hi: "#1d2a2a", rim: "#dfe6ea", rows: [
+    ".......XX.......", "......XXXX......", ".....XXXXXX.....", "....XXXXXXXX....", "...XXXXXXXXXX...", "..XXXXXXXXXXXX..",
+    ".XXXXXXXXXXXXXX.", "XXXXXXXXXXXXXXXX", "XXXXXXXXXXXXXXXX", "XXXXXXX..XXXXXXX", ".XXXXX....XXXXX.", "..XXX..XX..XXX..",
+    ".......XX.......", "......XXXX......", ".....XXXXXX.....", "....XXXXXXXX....",
+  ] },
 };
 export const PLAYER_ICON: Record<string, string> = { pedro: "spade", chloe: "heart" };
 

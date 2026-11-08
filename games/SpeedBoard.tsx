@@ -77,12 +77,9 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
     if (pile >= 0 && speed.canPlay(s, card, pile)) playCard(card, pile);
     else setShake(card);
   }
-  const over = (p: number) => drag && speed.canPlay(s, drag.card, p) && start.current?.moved;
-
   const tapPile = (pile: number) => sel !== null && speed.canPlay(s, sel, pile) && playCard(sel, pile);
   const flip = () => !s.flip[seat] && commit(speed.requestFlip(s, seat), s.v, (f) => speed.requestFlip(f, seat));
 
-  const pileCls = (p: number) => `${css.pile} ${(sel !== null && speed.canPlay(s, sel, p)) || over(p) ? css.hot : ""}`;
   const setPile = (at: number) => (el: HTMLButtonElement | null) => void (piles.current[at] = el);
 
   return (
@@ -103,8 +100,8 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
 
       <div className={css.table}>
         <Pile cards={s.side[0]} up={false} />
-        <Pile cards={s.center[0]} up={started} cls={pileCls(0)} onClick={() => tapPile(0)} refEl={setPile(0)} />
-        <Pile cards={s.center[1]} up={started} cls={pileCls(1)} onClick={() => tapPile(1)} refEl={setPile(1)} />
+        <Pile cards={s.center[0]} up={started} onClick={() => tapPile(0)} refEl={setPile(0)} />
+        <Pile cards={s.center[1]} up={started} onClick={() => tapPile(1)} refEl={setPile(1)} />
         <Pile cards={s.side[1]} up={false} />
       </div>
       {started && !done && (

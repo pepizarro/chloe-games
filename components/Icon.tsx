@@ -2,7 +2,7 @@
 import ICONS from "./icons.json";
 // Pixel art lives in art/icons/*.png (edit in LibreSprite/Aseprite), `npm run icons` regenerates icons.json.
 const BITMAPS = ICONS as Record<string, { palette: string[]; rows: string[] }>;
-export const PLAYER_ICON: Record<string, string> = { pedro: "spade", chloe: "heart" };
+export const PLAYER_ICON: Record<string, string> = { pedro: "frog", chloe: "bat" };
 
 const STONES = [[40, 70, "#41a6f6"], [60, 72, "#f4f4f4"], [30, 50, "#38b764"], [52, 52, "#333c57"], [68, 50, "#41a6f6"], [44, 32, "#f4f4f4"]] as const;
 

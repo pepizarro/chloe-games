@@ -4,7 +4,8 @@ import sharp from "sharp";
 import { readdirSync, writeFileSync } from "node:fs";
 const out = {};
 for (const f of readdirSync("art/icons").filter((f) => f.endsWith(".png")).sort()) {
-  const { data, info } = await sharp(`art/icons/${f}`).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  // trim: canvas size in the editor does not matter, only the drawn pixels
+  const { data, info } = await sharp(`art/icons/${f}`).ensureAlpha().trim({ background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 0 }).raw().toBuffer({ resolveWithObject: true });
   const palette = [], rows = [];
   for (let y = 0; y < info.height; y++) {
     let row = "";

@@ -55,8 +55,8 @@ export default function Lobby() {
       <div className="row" style={{ margin: "8px 0 16px" }}>
         <div className="plaque" style={{ flex: 1, margin: 0 }}>hi {me}</div>
         {bell !== null && (
-          <button className={`btn bell ${bell ? "gold" : "dim"}`} onClick={toggleBell} aria-label="notifications">
-            <Icon name="bell" />{bell ? "on" : "off"}
+          <button className={`btn bell ${bell ? "gold" : "dim"}`} onClick={toggleBell} aria-label={`notifications ${bell ? "on" : "off"}`}>
+            <Icon name={bell ? "bell" : "bell-off"} />
           </button>
         )}
       </div>

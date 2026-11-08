@@ -1,6 +1,7 @@
 // Small pixel icons. Players get a card suit (SVG bitmap); games reuse their own board pieces (.piece / .stone from globals.css).
 const BITMAPS: Record<string, { rows: string[]; fill: string; hi: string; rim?: string; pad?: number }> = {
   heart: { fill: "#fe5f55", hi: "#ffb3ad", rows: [".XX..XX.", "XoXXXXXX", "XXXXXXXX", "XXXXXXXX", ".XXXXXX.", "..XXXX..", "...XX..."] },
+  bell: { fill: "#ffd25a", hi: "#fff", rows: ["...XX...", "..XXXX..", ".XoXXXX.", ".XoXXXX.", ".XXXXXX.", "XXXXXXXX", "...XX..."] },
   home: { fill: "#fff", hi: "#c8a24c", rows: ["...XX...", "..XXXX..", ".XXXXXX.", "XXXXXXXX", ".XXXXXX.", ".XXooXX.", ".XXooXX."] },
   spade: { fill: "#1d2a2a", hi: "#1d2a2a", rim: "#b4bdbf", pad: 2, rows: [
     ".......XX.......", "......XXXX......", ".....XXXXXX.....", "....XXXXXXXX....", "...XXXXXXXXXX...", "..XXXXXXXXXXXX..",

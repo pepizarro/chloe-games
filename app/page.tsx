@@ -6,21 +6,24 @@ import { supabase, type Game } from "@/lib/supabase";
 import { other, usePlayer } from "@/lib/player";
 import { GAMES, type GameType } from "@/lib/games";
 import { Icon, PLAYER_ICON } from "@/components/Icon";
-import { pushSupported, subscribePush } from "@/lib/push";
+import { hasPush, pushSupported, subscribePush, unsubscribePush } from "@/lib/push";
 
 
 export default function Lobby() {
   const me = usePlayer()!;
   const router = useRouter();
   const [games, setGames] = useState<Game[]>([]);
-  const [bell, setBell] = useState(false); // show "notify me" button
+  const [bell, setBell] = useState(false); // notifications on in this browser
 
   useEffect(() => {
-    if (!pushSupported()) return;
-    // already granted: refresh the subscription silently (endpoints rotate); otherwise offer the button
-    if (Notification.permission === "granted") subscribePush(me);
-    else if (Notification.permission === "default") setBell(true);
+    // if subscribed, refresh the row silently (endpoints rotate)
+    hasPush().then((on) => (setBell(on), on && subscribePush(me)));
   }, [me]);
+
+  const toggleBell = async () => {
+    if (bell) await unsubscribePush();
+    setBell(bell ? false : await subscribePush(me));
+  };
 
   useEffect(() => {
     const load = () =>
@@ -48,12 +51,14 @@ export default function Lobby() {
 
   return (
     <>
-      <div className="plaque">hi {me}</div>
-      {bell && (
-        <button className="btn gold" onClick={() => subscribePush(me).then((ok) => setBell(!ok))}>
-          activate notifications
-        </button>
-      )}
+      <div className="row" style={{ margin: "8px 0 16px" }}>
+        <div className="plaque" style={{ flex: 1, margin: 0 }}>hi {me}</div>
+        {pushSupported() && (
+          <button className={`btn bell ${bell ? "gold" : "dim"}`} onClick={toggleBell} aria-label="notifications">
+            <Icon name="bell" />{bell ? "on" : "off"}
+          </button>
+        )}
+      </div>
       <div className="list">
         {(Object.keys(GAMES) as GameType[]).map((t) => {
           const g = games.find((x) => x.type === t && !x.winner);

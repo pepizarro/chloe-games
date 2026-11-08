@@ -15,6 +15,20 @@ export async function subscribePush(player: string): Promise<boolean> {
   return true;
 }
 
+/** Is this browser currently subscribed? */
+export async function hasPush(): Promise<boolean> {
+  if (!pushSupported() || Notification.permission !== "granted") return false;
+  const reg = await navigator.serviceWorker.getRegistration();
+  return !!(await reg?.pushManager.getSubscription());
+}
+
+export async function unsubscribePush() {
+  const sub = await (await navigator.serviceWorker.getRegistration())?.pushManager.getSubscription();
+  if (!sub) return;
+  await supabase.from("push_subs").delete().eq("endpoint", sub.endpoint);
+  await sub.unsubscribe();
+}
+
 // fire and forget
 export function notify(to: string, title: string, body: string, url: string) {
   fetch("/api/notify", { method: "POST", body: JSON.stringify({ to, title, body, url }) }).catch(() => {});

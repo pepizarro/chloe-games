@@ -4,6 +4,8 @@ import { connect4 } from "@/games/connect4";
 import { Connect4Board } from "@/games/Connect4Board";
 import { mancala } from "@/games/mancala";
 import { MancalaBoard } from "@/games/MancalaBoard";
+import { waldo } from "@/games/waldo";
+import { WaldoBoard } from "@/games/WaldoBoard";
 
 export type Move<S> = { state: S; turn: string | null; winner: string | null };
 
@@ -17,6 +19,7 @@ export type GameDef<S> = {
 export const GAMES = {
   connect4: { name: "Connect 4", init: connect4.init, Board: Connect4Board },
   mancala: { name: "Mancala", init: mancala.init, Board: MancalaBoard },
+  waldo: { name: "Where's Waldo", init: waldo.init, Board: WaldoBoard },
 } satisfies Record<string, GameDef<any>>;
 
 export type GameType = keyof typeof GAMES;

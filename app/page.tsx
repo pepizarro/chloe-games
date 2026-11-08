@@ -13,9 +13,10 @@ export default function Lobby() {
   const me = usePlayer()!;
   const router = useRouter();
   const [games, setGames] = useState<Game[]>([]);
-  const [bell, setBell] = useState(false); // notifications on in this browser
+  const [bell, setBell] = useState<boolean | null>(null); // null = unsupported / not checked yet
 
   useEffect(() => {
+    if (!pushSupported()) return;
     // if subscribed, refresh the row silently (endpoints rotate)
     hasPush().then((on) => (setBell(on), on && subscribePush(me)));
   }, [me]);
@@ -53,7 +54,7 @@ export default function Lobby() {
     <>
       <div className="row" style={{ margin: "8px 0 16px" }}>
         <div className="plaque" style={{ flex: 1, margin: 0 }}>hi {me}</div>
-        {pushSupported() && (
+        {bell !== null && (
           <button className={`btn bell ${bell ? "gold" : "dim"}`} onClick={toggleBell} aria-label="notifications">
             <Icon name="bell" />{bell ? "on" : "off"}
           </button>

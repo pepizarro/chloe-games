@@ -3,7 +3,7 @@ export type Found = Record<string, number>; // player -> ms from image on screen
 export type State = { round: number; ready: Record<string, number>; found: Found; results: Found[]; stop?: Record<string, boolean> };
 // ready[p] = highest round p agreed to play; round r runs once both are >= r. results[r] = that round's found.
 
-// Scenes 1-19 from github.com/vc1492a/Hey-Waldo, 20+ from github.com/tadejmagajna/HereIsWally (Handford's art; private use only).
+// Scenes 1-19: github.com/vc1492a/Hey-Waldo. 20-29: github.com/tadejmagajna/HereIsWally. 40-49: vuss.io (Handford's art; private use only).
 // Spots verified by eye (tiled YOLOv8 candidates, then a human look). Unverified ones are the dataset's tile label:
 // find him in dev, read the fraction the console logs on double-click, paste it here and drop the flag.
 const W = (n: number, x: number, y: number, unverified = false): Target =>
@@ -15,7 +15,9 @@ export const IMAGES: Target[] = [
   W(14, 0.122, 0.81), W(15, 0.189, 0.449), W(18, 0.803, 0.099), W(19, 0.267, 0.749),
   W(10, 0.453, 0.172), W(17, 0.476, 0.216), W(20, 0.105, 0.817), W(21, 0.652, 0.912),
   W(23, 0.559, 0.441), W(24, 0.413, 0.958), W(29, 0.73, 0.641),
-  W(16, 0.597, 0.281, true),
+  W(40, 0.404, 0.631), W(41, 0.179, 0.657), W(43, 0.917, 0.559), W(44, 0.857, 0.731),
+  W(45, 0.864, 0.4), W(46, 0.62, 0.381), W(48, 0.497, 0.207),
+  W(16, 0.597, 0.281, true), W(42, 0.5, 0.5, true), W(49, 0.5, 0.5, true),
 ];
 
 const init = (): State => ({ round: 0, ready: {}, found: {}, results: [], stop: {} });

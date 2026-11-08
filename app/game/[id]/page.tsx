@@ -2,7 +2,8 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase, type Game } from "@/lib/supabase";
-import { usePlayer } from "@/lib/player";
+import { other, usePlayer } from "@/lib/player";
+import { notify } from "@/lib/push";
 import { GAMES, type GameType, type Move } from "@/lib/games";
 
 const REPLAY_DELAY = 900; // ms the board sits at the pre-move state before the opponent's move animates in
@@ -39,8 +40,11 @@ export default function Room() {
     const { data, error } = await supabase.from("games").update(row).eq("id", id).eq("turn", me).select().single();
     if (error || !data) {
       const { data: fresh } = await supabase.from("games").select().eq("id", id).single();
-      setGame(fresh);
+      return setGame(fresh);
     }
+    const name = GAMES[game.type as GameType].name;
+    if (data.winner) notify(other(me), name, data.winner === "draw" ? "it's a draw" : data.winner === me ? `${me} won, rematch?` : "you won!", `/game/${id}`);
+    else notify(other(me), name, `${me} played, your turn`, `/game/${id}`);
   }
 
   if (!game) return <p className="panel">shuffling…</p>;

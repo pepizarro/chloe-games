@@ -6,12 +6,21 @@ import { supabase, type Game } from "@/lib/supabase";
 import { other, usePlayer } from "@/lib/player";
 import { GAMES, type GameType } from "@/lib/games";
 import { Icon, PLAYER_ICON } from "@/components/Icon";
+import { pushSupported, subscribePush } from "@/lib/push";
 
 
 export default function Lobby() {
   const me = usePlayer()!;
   const router = useRouter();
   const [games, setGames] = useState<Game[]>([]);
+  const [bell, setBell] = useState(false); // show "notify me" button
+
+  useEffect(() => {
+    if (!pushSupported()) return;
+    // already granted: refresh the subscription silently (endpoints rotate); otherwise offer the button
+    if (Notification.permission === "granted") subscribePush(me);
+    else if (Notification.permission === "default") setBell(true);
+  }, [me]);
 
   useEffect(() => {
     const load = () =>
@@ -40,6 +49,11 @@ export default function Lobby() {
   return (
     <>
       <div className="plaque">hi {me}</div>
+      {bell && (
+        <button className="btn gold" onClick={() => subscribePush(me).then((ok) => setBell(!ok))}>
+          🔔 tell me when it&apos;s my turn
+        </button>
+      )}
       <div className="list">
         {(Object.keys(GAMES) as GameType[]).map((t) => {
           const g = games.find((x) => x.type === t && !x.winner);

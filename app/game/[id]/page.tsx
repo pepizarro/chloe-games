@@ -34,7 +34,8 @@ export default function Room() {
 
   async function play(m: Move<unknown>) {
     if (!game) return;
-    const row = { ...m, prev: game.state, last_by: me };
+    // chained moves (mancala extra turns) keep the state from before the first one, so the opponent sees the whole run
+    const row = { ...m, prev: game.last_by === me && game.prev ? game.prev : game.state, last_by: me };
     setGame({ ...game, ...row }); // optimistic
     // .eq("turn", me) makes a stale/double move a no-op
     const { data, error } = await supabase.from("games").update(row).eq("id", id).eq("turn", me).select().single();

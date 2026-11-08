@@ -7,9 +7,25 @@ import { mancala, ownPits, STORE, type State } from "./mancala";
 const LIFT = 420; // ms the hand hovers over the picked pit before moving
 const STEP = 520; // ms per pit: travel, then drop one stone
 const DROP = 0.6; // fraction of STEP at which the stone leaves the hand
+const PAUSE = 450; // ms between chained moves (extra turns)
 const COLORS = ["#41a6f6", "#333c57", "#f4f4f4", "#38b764"];
 
 type Hand = { at: number; n: number } | null;
+
+/** Moves by `side` (extra turns in between) that turn `from` into `to`, or null. Depth-limited DFS, 6 options a level. */
+function findRun(from: number[], to: string, side: number, depth = 6): number[] | null {
+  if (!depth) return null;
+  for (const i of ownPits(side)) {
+    const r = mancala.move(from, i, side);
+    if (!r) continue;
+    if (r.pits.join() === to) return [i];
+    if (r.again) {
+      const rest = findRun(r.pits, to, side, depth - 1);
+      if (rest) return [i, ...rest];
+    }
+  }
+  return null;
+}
 
 /** Replays whichever legal move turns `from` into `to`: lift the pile, carry it pit to pit, drop one stone each. Snaps when no move matches. */
 function useSowing(pits: number[]) {
@@ -21,17 +37,27 @@ function useSowing(pits: number[]) {
   useEffect(() => {
     const from = prev.current;
     prev.current = pits;
-    const i = from.findIndex((_, k) => mancala.move(from, k, k < 7 ? 0 : 1)?.pits.join() === key);
-    if (i < 0) return setShown(pits);
-    const cur = from.slice();
-    const n = cur[i];
-    cur[i] = 0;
-    const frames: [number, () => void][] = [[0, () => (setShown(cur.slice()), setHand({ at: i, n }))]];
-    mancala.path(from, i).forEach((j, k) => {
-      frames.push([LIFT + k * STEP, () => setHand({ at: j, n: n - k })]);
-      frames.push([LIFT + (k + DROP) * STEP, () => (cur[j]++, setShown(cur.slice()), setHand({ at: j, n: n - k - 1 }))]);
-    });
-    frames.push([LIFT + n * STEP, () => (setShown(pits), setHand(null))]); // captures / end-of-game sweep land at once
+    const run = findRun(from, key, 0) ?? findRun(from, key, 1);
+    if (!run) return setShown(pits);
+    const frames: [number, () => void][] = [];
+    let t = 0, cur = from;
+    for (const i of run) {
+      const after = mancala.move(cur, i, i < 7 ? 0 : 1)!.pits;
+      const c = cur.slice(), n = c[i];
+      c[i] = 0;
+      const lifted = c.slice();
+      frames.push([t, () => (setShown(lifted), setHand({ at: i, n }))]);
+      mancala.path(cur, i).forEach((j, k) => {
+        frames.push([t + LIFT + k * STEP, () => setHand({ at: j, n: n - k })]);
+        const snap = (c[j]++, c.slice());
+        frames.push([t + LIFT + (k + DROP) * STEP, () => (setShown(snap), setHand({ at: j, n: n - k - 1 }))]);
+      });
+      t += LIFT + n * STEP;
+      frames.push([t, () => (setShown(after), setHand({ at: -1, n: 0 }))]); // captures / sweep land at once; still busy
+      t += PAUSE;
+      cur = after;
+    }
+    frames.push([t - PAUSE, () => setHand(null)]);
     const timers = frames.map(([t, f]) => setTimeout(f, t));
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps

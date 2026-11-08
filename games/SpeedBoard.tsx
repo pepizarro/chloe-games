@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { supabase, type Game } from "@/lib/supabase";
 import { img, speed, type State } from "./speed";
 import css from "./speed.module.css";
@@ -14,6 +14,9 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
   const [sel, setSel] = useState<number | null>(null); // hand card waiting for a pile choice
   const [shake, setShake] = useState<number | null>(null);
   const [rules, setRules] = useState(false);
+  const [drag, setDrag] = useState<{ card: number; dx: number; dy: number } | null>(null);
+  const piles = useRef<(HTMLButtonElement | null)[]>([]);
+  const start = useRef<{ x: number; y: number; moved: boolean } | null>(null);
   const s = local && local.v > server.v ? local : server;
   const started = speed.started(s);
   const done = !!game.winner;
@@ -49,12 +52,39 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
     setSel(sel === card ? null : card);
   }
 
+  // drag a hand card onto a centre pile; a press that barely moves is a tap
+  function down(e: PointerEvent<HTMLButtonElement>, card: number) {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    start.current = { x: e.clientX, y: e.clientY, moved: false };
+    setDrag({ card, dx: 0, dy: 0 });
+  }
+  function move(e: PointerEvent<HTMLButtonElement>) {
+    const st = start.current;
+    if (!st || !drag) return;
+    const dx = e.clientX - st.x, dy = e.clientY - st.y;
+    if (Math.hypot(dx, dy) > 6) st.moved = true;
+    setDrag({ ...drag, dx, dy });
+  }
+  function up(e: PointerEvent<HTMLButtonElement>, card: number) {
+    const moved = start.current?.moved;
+    start.current = null;
+    setDrag(null);
+    if (!moved) return tapHand(card);
+    const pile = piles.current.findIndex((el) => {
+      const r = el?.getBoundingClientRect();
+      return r && e.clientX >= r.left - 8 && e.clientX <= r.right + 8 && e.clientY >= r.top - 8 && e.clientY <= r.bottom + 8;
+    });
+    if (pile >= 0 && speed.canPlay(s, card, pile)) playCard(card, pile);
+    else setShake(card);
+  }
+  const over = (p: number) => drag && speed.canPlay(s, drag.card, p) && start.current?.moved;
+
   const tapPile = (pile: number) => sel !== null && speed.canPlay(s, sel, pile) && playCard(sel, pile);
   const flip = () => !s.flip[seat] && commit(speed.requestFlip(s, seat), s.v, (f) => speed.requestFlip(f, seat));
 
-  const pileCls = (p: number) => `${css.pile} ${sel !== null && speed.canPlay(s, sel, p) ? css.hot : ""}`;
-  const Pile = ({ cards, up, cls, onClick }: { cards: number[]; up: boolean; cls?: string; onClick?: () => void }) => (
-    <button className={cls ?? css.pile} onClick={onClick} disabled={!onClick}>
+  const pileCls = (p: number) => `${css.pile} ${(sel !== null && speed.canPlay(s, sel, p)) || over(p) ? css.hot : ""}`;
+  const Pile = ({ cards, up, cls, onClick, at }: { cards: number[]; up: boolean; cls?: string; onClick?: () => void; at?: number }) => (
+    <button ref={at === undefined ? undefined : (el) => void (piles.current[at] = el)} className={cls ?? css.pile} onClick={onClick} disabled={!onClick}>
       {cards.length ? <img key={up ? cards[cards.length - 1] : cards.length} className={css.card} src={up ? img(cards[cards.length - 1]) : BACK} alt="" draggable={false} /> : <i className={css.empty} />}
       {cards.length > 1 && <b className={css.n}>{cards.length}</b>}
     </button>
@@ -78,8 +108,8 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
 
       <div className={css.table}>
         <Pile cards={s.side[0]} up={false} />
-        <Pile cards={s.center[0]} up={started} cls={pileCls(0)} onClick={() => tapPile(0)} />
-        <Pile cards={s.center[1]} up={started} cls={pileCls(1)} onClick={() => tapPile(1)} />
+        <Pile cards={s.center[0]} up={started} cls={pileCls(0)} onClick={() => tapPile(0)} at={0} />
+        <Pile cards={s.center[1]} up={started} cls={pileCls(1)} onClick={() => tapPile(1)} at={1} />
         <Pile cards={s.side[1]} up={false} />
       </div>
       {started && !done && (
@@ -95,8 +125,12 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
           {s.hands[seat].map((c) => (
             <button
               key={c}
-              className={`${css.hcard} ${sel === c ? css.sel : ""} ${shake === c ? css.shake : ""}`}
-              onClick={() => tapHand(c)}
+              className={`${css.hcard} ${sel === c ? css.sel : ""} ${shake === c ? css.shake : ""} ${drag?.card === c ? css.drag : ""}`}
+              style={drag?.card === c ? { translate: `${drag.dx}px ${drag.dy}px` } : undefined}
+              onPointerDown={(e) => down(e, c)}
+              onPointerMove={move}
+              onPointerUp={(e) => up(e, c)}
+              onPointerCancel={() => (start.current = null, setDrag(null))}
               onAnimationEnd={() => shake === c && setShake(null)}
               disabled={!started || done}
             >

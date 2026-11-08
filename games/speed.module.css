@@ -28,7 +28,9 @@
 .urge { animation: bob .5s steps(2) infinite; }
 .mine { display: flex; align-items: flex-end; justify-content: center; gap: 14px; padding: 8px 10px 14px; }
 .hand { display: flex; gap: 6px; }
-.hcard { transition: translate .1s steps(2); }
+.hcard { transition: translate .1s steps(2); touch-action: none; }
+.drag { transition: none; z-index: 5; }
+.drag .card { filter: drop-shadow(0 10px 0 #0006); transform: scale(1.1); }
 .hcard:not(:disabled):hover { translate: 0 -4px; }
 .sel { translate: 0 -12px !important; }
 .sel .card { filter: drop-shadow(0 0 0 3px var(--accent)); }

@@ -40,25 +40,26 @@ body {
 }
 /* swirling felt: two blob layers drifting on different clocks */
 body::before, body::after {
-  content: ""; position: fixed; inset: -25%; z-index: -1; pointer-events: none;
-  will-change: transform;
+  content: ""; position: fixed; inset: -30%; z-index: -1; pointer-events: none; will-change: transform;
 }
 body::before {
   background:
-    radial-gradient(40% 50% at 30% 35%, #1f6b45 0, #0000 70%),
-    radial-gradient(35% 40% at 75% 65%, #06201a 0, #0000 70%),
+    radial-gradient(22% 26% at 28% 30%, #2d8f5c 0, #2d8f5c55 40%, #0000 72%),
+    radial-gradient(24% 20% at 72% 68%, #03150d 0, #0000 70%),
+    radial-gradient(18% 22% at 55% 12%, #27804f 0, #0000 70%),
     var(--felt);
-  animation: drift1 13s ease-in-out infinite alternate;
+  animation: drift1 7s ease-in-out infinite alternate;
 }
 body::after {
   background:
-    radial-gradient(30% 35% at 60% 85%, #22704a 0, #0000 70%),
-    radial-gradient(28% 30% at 15% 80%, #06201a 0, #0000 70%),
-    radial-gradient(25% 30% at 80% 15%, #1a5c3c 0, #0000 70%);
-  animation: drift2 9s ease-in-out infinite alternate;
+    radial-gradient(20% 24% at 62% 82%, #2f9560 0, #0000 70%),
+    radial-gradient(22% 18% at 14% 76%, #03150d 0, #0000 70%),
+    radial-gradient(16% 20% at 84% 22%, #2a8a58 0, #0000 70%),
+    radial-gradient(18% 16% at 38% 52%, #03150d 0, #0000 70%);
+  animation: drift2 5s ease-in-out infinite alternate;
 }
-@keyframes drift1 { to { transform: translate(-6%, 5%) rotate(-7deg) scale(1.12); } }
-@keyframes drift2 { to { transform: translate(7%, -6%) rotate(9deg) scale(1.15); } }
+@keyframes drift1 { to { transform: translate(-9%, 7%) rotate(-10deg) scale(1.15); } }
+@keyframes drift2 { to { transform: translate(10%, -8%) rotate(12deg) scale(1.2); } }
 
 a { color: var(--ink); text-decoration: none; }
 main { max-width: 480px; margin: 0 auto; padding: 12px 16px 32px; }
@@ -98,13 +99,8 @@ h2 { font-size: 10px; margin: 28px 0 8px; opacity: .7; text-transform: uppercase
 .topbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; margin-bottom: 16px; }
 
 /* poker chip icon */
-.chip {
-  --c: var(--blue);
-  flex: none; display: inline-grid; place-items: center; width: 40px; aspect-ratio: 1; clip-path: var(--circle);
-  background: radial-gradient(circle, #fff 0 36%, #0000 36%), repeating-conic-gradient(var(--c) 0 30deg, #fff 30deg 60deg);
-  color: var(--slate-dk); font-style: normal; font-size: 12px; text-shadow: none;
-}
-.chip.red { --c: var(--red); } .chip.gold { --c: var(--gold); } .chip.blue { --c: var(--blue); }
+.chip { flex: none; width: 40px; height: auto; display: block; }
+.pick .chip { width: 60px; }
 
 /* lobby cards */
 .list { display: grid; gap: 14px; }

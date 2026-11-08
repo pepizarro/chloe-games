@@ -2,11 +2,9 @@
 import Link from "next/link";
 import { PLAYERS, setPlayer, usePlayer } from "@/lib/player";
 
-export const CHIP: Record<string, string> = { pedro: "blue", chloe: "red" };
+import { Chip } from "./Chip";
 
-export function Chip({ tone, glyph }: { tone: string; glyph: string }) {
-  return <i className={`chip ${tone}`}>{glyph}</i>;
-}
+export const CHIP: Record<string, [string, string]> = { pedro: ["blue", "spade"], chloe: ["red", "heart"] };
 
 export function PlayerGate({ children }: { children: React.ReactNode }) {
   const me = usePlayer();
@@ -17,7 +15,7 @@ export function PlayerGate({ children }: { children: React.ReactNode }) {
         <div className="row" style={{ justifyContent: "center" }}>
           {PLAYERS.map((p) => (
             <button key={p} className="pick" onClick={() => setPlayer(p)}>
-              <Chip tone={CHIP[p]} glyph={p[0].toUpperCase()} />
+              <Chip tone={CHIP[p][0]} suit={CHIP[p][1]} />
               {p}
             </button>
           ))}
@@ -29,7 +27,7 @@ export function PlayerGate({ children }: { children: React.ReactNode }) {
       <div className="topbar panel">
         <Link href="/" className="btn gold tag">◂ casino</Link>
         <span className="row" style={{ gap: 6 }}>
-          <Chip tone={CHIP[me]} glyph={me[0].toUpperCase()} />
+          <Chip tone={CHIP[me][0]} suit={CHIP[me][1]} />
           {me}
           {process.env.NODE_ENV === "development" && (
             <button className="btn dim" style={{ padding: "4px 8px", fontSize: 9 }} onClick={() => setPlayer(null)}>switch</button>

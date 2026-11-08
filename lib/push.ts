@@ -8,10 +8,12 @@ export async function subscribePush(player: string): Promise<boolean> {
   if (!pushSupported()) return false;
   const reg = await navigator.serviceWorker.register("/sw.js");
   if ((await Notification.requestPermission()) !== "granted") return false;
-  const sub =
-    (await reg.pushManager.getSubscription()) ??
-    (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY }));
-  await supabase.from("push_subs").upsert({ endpoint: sub.endpoint, player, sub: sub.toJSON() });
+  let sub = await reg.pushManager.getSubscription();
+  const fresh = !sub;
+  sub ??= await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY });
+  const { error } = await supabase.from("push_subs").upsert({ endpoint: sub.endpoint, player, sub: sub.toJSON() });
+  if (error) return alert(error.message), false;
+  if (fresh) notify(player, "Games", "notifications are on!", "/"); // self-test
   return true;
 }
 

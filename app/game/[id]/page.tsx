@@ -44,7 +44,7 @@ export default function Room() {
     }
     const name = GAMES[game.type as GameType].name;
     if (data.winner) notify(other(me), name, data.winner === "draw" ? "it's a draw" : data.winner === me ? `${me} won, rematch?` : "you won!", `/game/${id}`);
-    else notify(other(me), name, `${me} played, your turn`, `/game/${id}`);
+    else if (data.turn !== me) notify(other(me), name, `${me} played, your turn`, `/game/${id}`); // not on a mancala extra turn
   }
 
   if (!game) return <p className="panel">shuffling…</p>;

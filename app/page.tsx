@@ -13,6 +13,7 @@ export default function Lobby() {
   const me = usePlayer()!;
   const router = useRouter();
   const [games, setGames] = useState<Game[]>([]);
+  const [enabled, setEnabled] = useState<GameType[]>([]); // toggled in the game_types table
   const [bell, setBell] = useState<boolean | null>(null); // null = unsupported / not checked yet
 
   useEffect(() => {
@@ -27,6 +28,8 @@ export default function Lobby() {
   };
 
   useEffect(() => {
+    supabase.from("game_types").select("type").eq("enabled", true)
+      .then(({ data }) => setEnabled((data ?? []).map((r) => r.type).filter((t): t is GameType => t in GAMES)));
     const load = () =>
       supabase.from("games").select().order("updated_at", { ascending: false }).then(({ data }) => setGames(data ?? []));
     load();
@@ -61,7 +64,7 @@ export default function Lobby() {
         )}
       </div>
       <div className="list">
-        {(Object.keys(GAMES) as GameType[]).map((t) => {
+        {enabled.map((t) => {
           const g = games.find((x) => x.type === t && !x.winner);
           if (!g)
             return (

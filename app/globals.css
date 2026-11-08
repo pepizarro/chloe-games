@@ -98,10 +98,12 @@ h2 { font-size: 10px; margin: 28px 0 8px; opacity: .7; text-transform: uppercase
 
 .topbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; margin-bottom: 16px; }
 
-/* poker chip icon */
-.chip { flex: none; width: 56px; height: 56px; object-fit: contain; display: block; }
-.topbar .chip { width: 40px; height: 40px; }
-.pick .chip { width: 84px; height: 84px; }
+/* icons */
+.icon { flex: none; width: 44px; height: 44px; display: block; position: relative; }
+.topbar .icon { width: 28px; height: 28px; }
+.pick .icon { width: 64px; height: 64px; }
+.icon-c4 { --pad: 2px; }                      /* .piece sizes itself from --pad */
+.icon-stones .stone { width: 30%; height: 30%; }
 
 /* lobby cards */
 .list { display: grid; gap: 14px; }
@@ -115,7 +117,7 @@ h2 { font-size: 10px; margin: 28px 0 8px; opacity: .7; text-transform: uppercase
 .card.live { box-shadow: 0 4px 0 var(--slate-dk), inset 0 0 0 3px var(--blue); }
 .card.live .tag { animation: bob 1s steps(2) infinite; }
 .card.waiting { opacity: .55; }
-.card.waiting .chip { filter: grayscale(.8); }
+.card.waiting .icon { filter: grayscale(.8); }
 .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
 /* who's playing */
@@ -124,7 +126,6 @@ h2 { font-size: 10px; margin: 28px 0 8px; opacity: .7; text-transform: uppercase
   --c: var(--slate); transition: translate .1s steps(2); }
 .pick:hover { translate: 0 -3px; }
 .pick:active { translate: 0 3px; box-shadow: 0 1px 0 color-mix(in srgb, var(--c), #000 40%); }
-.pick .chip { width: 56px; font-size: 16px; }
 
 @media (prefers-reduced-motion: reduce) { body::before, body::after, .status, .tag { animation: none !important; } }
 

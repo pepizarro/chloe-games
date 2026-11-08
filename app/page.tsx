@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase, type Game } from "@/lib/supabase";
 import { other, usePlayer } from "@/lib/player";
 import { GAMES, type GameType } from "@/lib/games";
-import { Chip } from "@/components/Chip";
+import { Icon } from "@/components/Icon";
 
 
 export default function Lobby() {
@@ -35,7 +35,7 @@ export default function Lobby() {
   }
 
   const done = games.filter((g) => g.winner);
-  const glyph = (t: string) => <Chip name={t} />;
+  const glyph = (t: string) => <Icon name={t} />;
 
   return (
     <>

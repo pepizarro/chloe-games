@@ -82,8 +82,8 @@ function render(name, color, letter) {
     for (let dy = 0; dy < F; dy++) for (let dx = 0; dx < F; dx++) { const o = idx(X0 + x * F + dx, Y0 + y * F + dy), al = out[o + 3] / 255; r += out[o] * al; gg += out[o + 1] * al; b += out[o + 2] * al; a += al; }
     const o = (y * ow + x) * 4; if (a) { small[o] = r / a; small[o + 1] = gg / a; small[o + 2] = b / a; } small[o + 3] = (a / (F * F)) * 255;
   }
-  mkdirSync(new URL("../../public/chips", import.meta.url).pathname", { recursive: true });
-  encode(`/Users/pedro/personal/projects/chloe/public/chips/${name}.png`, ow, oh, small);
+  mkdirSync(OUT, { recursive: true });
+  encode(`${OUT}/${name}.png`, ow, oh, small);
   console.log(name, ow, oh);
 }
 render("chloe", null, "C");

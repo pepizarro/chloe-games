@@ -4,8 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
-  // second local player (localhost + 127.0.0.1 = two localStorage identities) and phones on the LAN
-  allowedDevOrigins: ["127.0.0.1", "192.168.*.*", "10.*.*.*", "*.local"],
+  allowedDevOrigins: ["**"], // dev only; any host on the LAN (phones, 127.0.0.1 as a second player) can load the dev server
 };
 
 export default nextConfig;

@@ -4,7 +4,6 @@ import { PLAYERS, setPlayer, usePlayer } from "@/lib/player";
 
 import { Chip } from "./Chip";
 
-export const CHIP: Record<string, [string, string]> = { pedro: ["blue", "spade"], chloe: ["red", "heart"] };
 
 export function PlayerGate({ children }: { children: React.ReactNode }) {
   const me = usePlayer();
@@ -15,7 +14,7 @@ export function PlayerGate({ children }: { children: React.ReactNode }) {
         <div className="row" style={{ justifyContent: "center" }}>
           {PLAYERS.map((p) => (
             <button key={p} className="pick" onClick={() => setPlayer(p)}>
-              <Chip tone={CHIP[p][0]} suit={CHIP[p][1]} />
+              <Chip name={p} />
               {p}
             </button>
           ))}
@@ -27,7 +26,7 @@ export function PlayerGate({ children }: { children: React.ReactNode }) {
       <div className="topbar panel">
         <Link href="/" className="btn gold tag">◂ casino</Link>
         <span className="row" style={{ gap: 6 }}>
-          <Chip tone={CHIP[me][0]} suit={CHIP[me][1]} />
+          <Chip name={me} />
           {me}
           {process.env.NODE_ENV === "development" && (
             <button className="btn dim" style={{ padding: "4px 8px", fontSize: 9 }} onClick={() => setPlayer(null)}>switch</button>

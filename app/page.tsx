@@ -7,7 +7,6 @@ import { other, usePlayer } from "@/lib/player";
 import { GAMES, type GameType } from "@/lib/games";
 import { Chip } from "@/components/Chip";
 
-const GLYPH: Record<string, [string, string]> = { connect4: ["black", "club"], mancala: ["gold", "diamond"] };
 
 export default function Lobby() {
   const me = usePlayer()!;
@@ -36,7 +35,7 @@ export default function Lobby() {
   }
 
   const done = games.filter((g) => g.winner);
-  const glyph = (t: string) => <Chip tone={GLYPH[t]?.[0]} suit={GLYPH[t]?.[1]} />;
+  const glyph = (t: string) => <Chip name={t} />;
 
   return (
     <>

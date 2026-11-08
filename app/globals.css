@@ -99,8 +99,9 @@ h2 { font-size: 10px; margin: 28px 0 8px; opacity: .7; text-transform: uppercase
 .topbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; margin-bottom: 16px; }
 
 /* poker chip icon */
-.chip { flex: none; width: 40px; height: auto; display: block; }
-.pick .chip { width: 60px; }
+.chip { flex: none; width: 56px; height: 56px; object-fit: contain; display: block; }
+.topbar .chip { width: 40px; height: 40px; }
+.pick .chip { width: 84px; height: 84px; }
 
 /* lobby cards */
 .list { display: grid; gap: 14px; }

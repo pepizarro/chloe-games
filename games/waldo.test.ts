@@ -40,4 +40,7 @@ test("phases, agreement and next-round bookkeeping", () => {
   const skipped = waldo.next({ ...s, ready: { a: 2, b: 2 } });
   assert.deepEqual(skipped.results.at(-1), {});
   assert.deepEqual(waldo.wins(skipped.results, p), [0, 1]);
+  assert.ok(!waldo.stopped({ ...s, stop: { a: true } }, p));
+  assert.ok(waldo.stopped({ ...s, stop: { a: true, b: true } }, p));
+  assert.ok(!waldo.stopped(waldo.init(), p)); // old rows without stop
 });

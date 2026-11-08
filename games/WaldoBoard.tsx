@@ -20,14 +20,22 @@ export function WaldoBoard({ game, me }: { game: Game<State>; me: string }) {
   const patch = (path: string[], value: unknown) =>
     supabase.rpc("patch_state", { game_id: game.id, path, value, guard: { round: s.round } }).then(logErr);
 
-  // Both clicked next (or skip) → write the following round. Guarded by round, so whichever client lands second is a no-op.
+  // Both clicked next/skip → following round. Both clicked stop → finish now. Guarded by round, so whichever
+  // client lands second is a no-op.
   useEffect(() => {
-    if (phase === "lobby" || game.winner || !waldo.agreed(s, players, s.round + 1)) return;
+    if (game.winner) return;
+    const stop = waldo.stopped(s, players);
+    if (!stop && (phase === "lobby" || !waldo.agreed(s, players, s.round + 1))) return;
     const next = waldo.next(s);
     const row =
-      next.round < IMAGES.length ? { state: next } : { state: next, turn: null, winner: waldo.matchWinner(next.results, players) };
+      !stop && next.round < IMAGES.length
+        ? { state: next }
+        : { state: next, turn: null, winner: waldo.matchWinner(next.results, players) };
     supabase.from("games").update(row).eq("id", game.id).eq("state->>round", String(s.round)).then(logErr);
   }, [phase, s, players, game.id, game.winner]);
+
+  const iStop = !!s.stop?.[me];
+  const theyStop = !!s.stop?.[them];
 
   return (
     <div className={css.screen}>
@@ -35,6 +43,11 @@ export function WaldoBoard({ game, me }: { game: Game<State>; me: string }) {
         <Link href="/" className="btn red">◂</Link>
         <b>{Math.min(s.round + 1, IMAGES.length)}/{IMAGES.length}</b>
         <span>{score}</span>
+        {!game.winner && (
+          <button className={`btn ${iStop ? "dim" : "red"}`} onClick={() => patch(["stop", me], !iStop)}>
+            {iStop ? "stop?" : theyStop ? `${them} wants to stop` : "stop"}
+          </button>
+        )}
       </header>
       {phase === "lobby" && (
         <div className={css.sheet}>
@@ -105,7 +118,8 @@ function Round({ target, found, me, them, last, waiting, onFound, onNext }: {
     return () => clearInterval(t);
   }, [live, over]);
 
-  // ctrl/pinch-wheel zoom; native listener because React's wheel handler is passive and can't stop page zoom
+  // desktop zoom: ctrl/trackpad-pinch wheel. Phones pinch natively (touch-action: manipulation keeps pinch, drops double-tap zoom).
+  // Native listener because React's wheel handler is passive and can't preventDefault.
   useEffect(() => {
     const el = view.current!;
     const onWheel = (e: WheelEvent) => {
@@ -142,10 +156,7 @@ function Round({ target, found, me, them, last, waiting, onFound, onNext }: {
     <>
       <div className={css.sub}>
         <b className={css.timer}>{live ? sec(mine ?? ms) : count > 0 ? count : "…"}</b>
-        <span className="row" style={{ gap: 6 }}>
-          <button className="btn dim" onClick={() => setZoom((z) => Math.max(1, z - 0.5))}>−</button>
-          <button className="btn dim" onClick={() => setZoom((z) => Math.min(5, z + 0.5))}>+</button>
-        </span>
+        {live && !over && (waiting ? <span className="tag dim">waiting for {them} to skip…</span> : <button className="btn dim" onClick={onNext}>skip</button>)}
       </div>
       <div ref={view} className={css.view}>
         <div className={css.canvas} style={{ width: `${zoom * 100}%`, visibility: live ? "visible" : "hidden" }}>
@@ -160,11 +171,7 @@ function Round({ target, found, me, them, last, waiting, onFound, onNext }: {
           <p>find {target.hint}</p>
         </div>
       )}
-      {live && !over && (
-        <p className={css.hint}>
-          {waiting ? `waiting for ${them} to skip…` : <>double-click {target.hint} <button className="btn dim" onClick={onNext}>skip</button></>}
-        </p>
-      )}
+      {live && !over && <p className={css.hint}>double-tap {target.hint}</p>}
       {over && (
         <div className={css.sheet}>
           {Object.entries(all).sort((a, b) => a[1] - b[1]).map(([p, t]) => <p key={p}>{p === me ? "you" : p} found it in {sec(t)}</p>)}

@@ -1,7 +1,9 @@
 .screen { position: fixed; inset: 0; z-index: 10; background: var(--slate-dk); display: grid; grid-template-rows: auto auto 1fr; }
 .hud { display: flex; align-items: center; gap: 12px; padding: 8px 10px; background: var(--slate); font-size: 10px; box-shadow: 0 4px 0 #0004; z-index: 1; }
 .hud > span { flex: 1; text-align: right; }
-.sub { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 10px; }
+.hud .btn { padding: 6px 8px; font-size: 8px; }
+.sub { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 10px; min-height: 44px; }
+.sub .btn, .sub .tag { padding: 6px 10px; font-size: 8px; }
 .timer { font-size: 14px; color: var(--accent); }
 .view { min-height: 0; overflow: auto; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 .canvas { position: relative; min-width: 100%; }
@@ -12,8 +14,7 @@
 }
 .miss { position: absolute; translate: -50% -50%; color: var(--red); font-size: 24px; font-style: normal; pointer-events: none; animation: fade .6s forwards; }
 .center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: 8px; }
-.hint { position: absolute; left: 50%; bottom: 12px; translate: -50%; margin: 0; padding: 6px 12px; background: #000a; border-radius: 8px; font-size: 10px; white-space: nowrap; }
-.hint .btn { padding: 4px 8px; font-size: 8px; margin-left: 8px; }
+.hint { position: absolute; left: 50%; bottom: 12px; translate: -50%; margin: 0; padding: 6px 12px; background: #000a; border-radius: 8px; font-size: 10px; max-width: 90%; pointer-events: none; }
 .sheet {
   position: absolute; left: 0; right: 0; bottom: 0; padding: 16px; background: var(--slate); box-shadow: 0 -4px 0 var(--slate-dk);
   text-align: center; display: grid; gap: 8px; justify-items: center;

@@ -1,13 +1,13 @@
 export type Target = { src: string; hint: string; x: number; y: number; r: number }; // x,y: fraction of width/height; r: fraction of width
 export type Found = Record<string, number>; // player -> ms from image on screen to double-click
-export type State = { round: number; ready: Record<string, number>; found: Found; results: Found[] };
+export type State = { round: number; ready: Record<string, number>; found: Found; results: Found[]; stop?: Record<string, boolean> };
 // ready[p] = highest round p agreed to play; round r runs once both are >= r. results[r] = that round's found.
 
 // Scenes from github.com/vc1492a/Hey-Waldo (ODbL labels, Handford's art; private use only).
 // verified: I looked at the spot. Unverified ones are the dataset's best tile label, which is usually a look-alike:
 // find him in dev, read the fraction the console logs on double-click, paste it here and drop the flag.
 const W = (n: number, x: number, y: number, unverified = false): Target =>
-  ({ src: `/waldo/${n}.jpg`, hint: unverified ? "waldo (spot unverified, skip if stuck)" : "waldo", x, y, r: 0.03 });
+  ({ src: `/waldo/${n}.jpg`, hint: unverified ? "waldo · unverified spot" : "waldo", x, y, r: 0.03 });
 export const IMAGES: Target[] = [
   W(1, 0.355, 0.437),
   W(9, 0.21, 0.792),
@@ -18,7 +18,7 @@ export const IMAGES: Target[] = [
   W(16, 0.597, 0.281, true), W(17, 0.764, 0.344, true), W(18, 0.77, 0.437, true), W(19, 0.184, 0.438, true),
 ];
 
-const init = (): State => ({ round: 0, ready: {}, found: {}, results: [] });
+const init = (): State => ({ round: 0, ready: {}, found: {}, results: [], stop: {} });
 
 /** Is the double-click at (fx, fy) on the target? aspect = image height / width, so the radius is round on screen. */
 const hit = (t: Target, fx: number, fy: number, aspect: number) => Math.hypot(fx - t.x, (fy - t.y) * aspect) <= t.r;
@@ -39,10 +39,13 @@ function matchWinner(results: Found[], players: string[]): string {
 
 const agreed = (s: State, players: string[], round: number) => players.every((p) => (s.ready[p] ?? -1) >= round);
 
+/** Both asked to end the match early. */
+const stopped = (s: State, players: string[]) => players.every((p) => s.stop?.[p]);
+
 const phase = (s: State, players: string[]): "lobby" | "play" | "result" =>
   Object.keys(s.found).length ? "result" : agreed(s, players, s.round) ? "play" : "lobby";
 
 /** Next round, carrying this round's times into results. */
 const next = (s: State): State => ({ round: s.round + 1, ready: s.ready, found: {}, results: [...s.results, s.found] });
 
-export const waldo = { init, hit, roundWinner, wins, matchWinner, agreed, phase, next };
+export const waldo = { init, hit, roundWinner, wins, matchWinner, agreed, stopped, phase, next };

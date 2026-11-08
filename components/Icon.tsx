@@ -3,6 +3,7 @@ const BITMAPS: Record<string, { rows: string[]; fill: string; hi: string; rim?: 
   heart: { fill: "#fe5f55", hi: "#ffb3ad", rows: [".XX..XX.", "XoXXXXXX", "XXXXXXXX", "XXXXXXXX", ".XXXXXX.", "..XXXX..", "...XX..."] },
   bell: { fill: "#ffd25a", hi: "#fff", rows: ["...XX...", "..XXXX..", ".XoXXXX.", ".XoXXXX.", ".XXXXXX.", "XXXXXXXX", "...XX...", "........"] },
   "bell-off": { fill: "#9aa5a8", hi: "#fe5f55", rows: ["...XX..o", "..XXXXo.", ".XXXXoX.", ".XXXoXX.", ".XXoXXX.", "XXoXXXXX", ".o.XX...", "o......."] },
+  waldo: { fill: "#fe5f55", hi: "#fff", rows: ["...oo...", "..XXXX..", ".oooooo.", ".XXXXXX.", ".oooooo.", ".XXXXXX.", "XXXXXXXX"] },
   home: { fill: "#fff", hi: "#c8a24c", rows: ["...XX...", "..XXXX..", ".XXXXXX.", "XXXXXXXX", ".XXXXXX.", ".XXooXX.", ".XXooXX."] },
   spade: { fill: "#1d2a2a", hi: "#1d2a2a", rim: "#b4bdbf", pad: 2, rows: [
     ".......XX.......", "......XXXX......", ".....XXXXXX.....", "....XXXXXXXX....", "...XXXXXXXXXX...", "..XXXXXXXXXXXX..",

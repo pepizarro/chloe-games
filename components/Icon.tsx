@@ -16,10 +16,12 @@ export function Icon({ name }: { name: string }) {
       </i>
     );
   const b = BITMAPS[name] ?? BITMAPS.heart;
-  const w = b.rows[0].length, h = b.rows.length;
-  const path = (ch: string) => b.rows.flatMap((r, y) => [...r].map((c, x) => (c === ch ? `M${x} ${y}h1v1h-1z` : ""))).join("");
+  const w = b.rows[0].length, h = b.rows.length, m = Math.max(1, Math.round(w / 8)); // margin: 1/8 of the width
+  // one rect per horizontal run of the same colour
+  const path = (ch: string) =>
+    b.rows.map((r, y) => [...r.matchAll(new RegExp(`${ch}+`, "g"))].map((k) => `M${k.index} ${y}h${k[0].length}v1h-${k[0].length}z`).join("")).join("");
   return (
-    <svg className="icon" viewBox={`-1 -1 ${w + 2} ${h + 2}`} shapeRendering="crispEdges" aria-hidden>
+    <svg className="icon" viewBox={`${-m} ${-m} ${w + 2 * m} ${h + 2 * m}`} shapeRendering="crispEdges" aria-hidden>
       {b.palette.map((c, i) => <path key={c} d={path(i.toString(36))} fill={c} />)}
     </svg>
   );

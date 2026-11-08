@@ -32,7 +32,8 @@
     4px 8px, 8px 8px, 8px 4px, 16px 4px);
 }
 * { box-sizing: border-box; }
-html { background: var(--felt-dk); min-height: 100%; }
+/* same tone as the felt layers blended over it, so any strip iOS leaves uncovered (safe area, overscroll) is invisible */
+html { background: color-mix(in srgb, var(--felt) 55%, var(--felt-dk)); min-height: 100%; }
 html, body { margin: 0; color: var(--ink); }
 body {
   font-family: var(--font-pixel), monospace; font-size: 12px; line-height: 1.8; image-rendering: pixelated;

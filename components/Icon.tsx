@@ -1,8 +1,8 @@
 // Small pixel icons. Players get a card suit (SVG bitmap); games reuse their own board pieces (.piece / .stone from globals.css).
-const BITMAPS: Record<string, { rows: string[]; fill: string; hi: string; rim?: string }> = {
+const BITMAPS: Record<string, { rows: string[]; fill: string; hi: string; rim?: string; pad?: number }> = {
   heart: { fill: "#fe5f55", hi: "#ffb3ad", rows: [".XX..XX.", "XoXXXXXX", "XXXXXXXX", "XXXXXXXX", ".XXXXXX.", "..XXXX..", "...XX..."] },
   home: { fill: "#fff", hi: "#c8a24c", rows: ["...XX...", "..XXXX..", ".XXXXXX.", "XXXXXXXX", ".XXXXXX.", ".XXooXX.", ".XXooXX."] },
-  spade: { fill: "#1d2a2a", hi: "#1d2a2a", rim: "#dfe6ea", rows: [
+  spade: { fill: "#1d2a2a", hi: "#1d2a2a", rim: "#b4bdbf", pad: 2, rows: [
     ".......XX.......", "......XXXX......", ".....XXXXXX.....", "....XXXXXXXX....", "...XXXXXXXXXX...", "..XXXXXXXXXXXX..",
     ".XXXXXXXXXXXXXX.", "XXXXXXXXXXXXXXXX", "XXXXXXXXXXXXXXXX", "XXXXXXX..XXXXXXX", ".XXXXX....XXXXX.", "..XXX..XX..XXX..",
     ".......XX.......", "......XXXX......", ".....XXXXXX.....", "....XXXXXXXX....",
@@ -22,7 +22,7 @@ export function Icon({ name }: { name: string }) {
       </i>
     );
   const b = BITMAPS[name] ?? BITMAPS.heart;
-  const w = b.rows[0].length, h = b.rows.length;
+  const w = b.rows[0].length, h = b.rows.length, pad = b.pad ?? 1;
   const at = (x: number, y: number) => b.rows[y]?.[x] ?? ".";
   const px = (x: number, y: number) => `M${x} ${y}h1v1h-1z`;
   const path = (ch: string) => b.rows.flatMap((r, y) => [...r].map((c, x) => (c === ch ? px(x, y) : ""))).join("");
@@ -33,7 +33,7 @@ export function Icon({ name }: { name: string }) {
       for (let x = -1; x <= w; x++)
         if (at(x, y) === "." && [at(x + 1, y), at(x - 1, y), at(x, y + 1), at(x, y - 1)].some((c) => c !== ".")) rim += px(x, y);
   return (
-    <svg className="icon" viewBox={`-1 -1 ${w + 2} ${h + 2}`} shapeRendering="crispEdges" aria-hidden>
+    <svg className="icon" viewBox={`${-pad} ${-pad} ${w + 2 * pad} ${h + 2 * pad}`} shapeRendering="crispEdges" aria-hidden>
       {b.rim && <path d={rim} fill={b.rim} />}
       <path d={path("X") + path("o")} fill={b.fill} />
       <path d={path("o")} fill={b.hi} />

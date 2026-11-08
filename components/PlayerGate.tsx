@@ -24,7 +24,7 @@ export function PlayerGate({ children }: { children: React.ReactNode }) {
   return (
     <main>
       <div className="topbar panel">
-        <Link href="/" className="btn gold tag">◂ casino</Link>
+        <Link href="/" className="btn gold tag row" style={{ gap: 6, padding: "4px 10px" }}><Icon name="home" /> lobby</Link>
         <span className="row" style={{ gap: 6 }}>
           <Icon name={PLAYER_ICON[me]} />
           {me}

@@ -101,6 +101,7 @@ h2 { font-size: 10px; margin: 28px 0 8px; opacity: .7; text-transform: uppercase
 /* icons */
 .icon { flex: none; width: 44px; height: 44px; display: block; position: relative; }
 .topbar .icon { width: 28px; height: 28px; }
+.topbar .tag .icon { width: 18px; height: 18px; }
 .pick .icon { width: 64px; height: 64px; }
 .icon-c4 { --pad: 2px; }                      /* .piece sizes itself from --pad */
 .icon-stones .stone { width: 30%; height: 30%; }

@@ -1,5 +1,6 @@
-// screenshot of pixel art (grid lines, flat bg) -> clean 1px-per-cell PNG with transparent bg.
-// usage: PITCH=12 node scripts/depix.mjs in.png art/icons/name.png [bgTolerance]   then: npm run icons
+// screenshot of pixel art -> clean 1px-per-cell PNG with transparent bg, then: npm run icons
+// env: PITCH=12 (screen px per art px, else guessed) BG=r,g,b (else most common border colour) KEEP=largest (drop stray blobs) QUANT=40 (colour merge distance)
+// usage: PITCH=10 BG=151,81,103 KEEP=largest node scripts/depix.mjs in.png art/icons/name.png [bgTolerance]
 // screenshot of pixel art -> clean 1px-per-cell PNG. usage: node depix.mjs in.png out.png [bgTolerance]
 import sharp from "sharp";
 const [, , inp, out, tolArg] = process.argv;
@@ -40,13 +41,36 @@ for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
 const border = [];
 for (let c = 0; c < cols; c++) border.push(cells[c], cells[(rows - 1) * cols + c]);
 for (let r = 0; r < rows; r++) border.push(cells[r * cols], cells[r * cols + cols - 1]);
-const bg = med(border.map((v) => v.join(","))).split(",").map(Number); // not a true median, but picks a typical one
+// most common border colour (binned), unless BG=r,g,b is given
+const bins = {};
+for (const v of border) { const k = v.map((x) => Math.round(x / 24)).join(","); bins[k] = (bins[k] ?? 0) + 1; }
+const topBin = Object.entries(bins).sort((a, b) => b[1] - a[1])[0][0];
+const bg = process.env.BG ? process.env.BG.split(",").map(Number) : border.find((v) => v.map((x) => Math.round(x / 24)).join(",") === topBin);
 console.log("bg", bg);
 // palette: merge colours closer than 40
 const palette = [];
-const quant = (v) => { let k = palette.find((q) => dist(q, v) < 40); if (!k) palette.push((k = v)); return k; };
+const Q = +(process.env.QUANT ?? 40); // merge colours closer than this
+const quant = (v) => { let k = palette.find((q) => dist(q, v) < Q); if (!k) palette.push((k = v)); return k; };
+// background = cells near bg colour AND reachable from the border (flood fill), so enclosed light areas survive
+const isBg = cells.map((v) => dist(v, bg) < TOL), seen = new Uint8Array(cells.length), stack = [];
+for (let c = 0; c < cols; c++) stack.push(c, (rows - 1) * cols + c);
+for (let r = 0; r < rows; r++) stack.push(r * cols, r * cols + cols - 1);
+while (stack.length) { const i = stack.pop(); if (seen[i] || !isBg[i]) continue; seen[i] = 1; const x = i % cols, y = (i / cols) | 0; if (x) stack.push(i - 1); if (x < cols - 1) stack.push(i + 1); if (y) stack.push(i - cols); if (y < rows - 1) stack.push(i + cols); }
+// KEEP=largest: drop every opaque blob but the biggest (stray stars, leaves, grid remnants)
+const keep = new Uint8Array(cells.length).fill(1);
+if (process.env.KEEP === "largest") {
+  const comp = new Int32Array(cells.length).fill(-1), sizes = [];
+  for (let i = 0; i < cells.length; i++) {
+    if (seen[i] || comp[i] >= 0) continue;
+    const id = sizes.length, st = [i]; let n = 0;
+    while (st.length) { const j = st.pop(); if (seen[j] || comp[j] >= 0) continue; comp[j] = id; n++; const x = j % cols, y = (j / cols) | 0; if (x) st.push(j - 1); if (x < cols - 1) st.push(j + 1); if (y) st.push(j - cols); if (y < rows - 1) st.push(j + cols); }
+    sizes.push(n);
+  }
+  const big = sizes.indexOf(Math.max(...sizes));
+  for (let i = 0; i < cells.length; i++) keep[i] = comp[i] === big ? 1 : 0;
+}
 const outBuf = Buffer.alloc(cols * rows * 4);
-cells.forEach((v, i) => { if (dist(v, bg) < TOL) return; const q = quant(v); outBuf.set([...q, 255], i * 4); });
+cells.forEach((v, i) => { if (seen[i] || !keep[i]) return; const q = quant(v); outBuf.set([...q, 255], i * 4); });
 console.log("palette", palette.map((c) => "#" + c.map((v) => v.toString(16).padStart(2, "0")).join("")));
 const img = sharp(outBuf, { raw: { width: cols, height: rows, channels: 4 } }).trim({ background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 0 });
 await img.png().toFile(out);

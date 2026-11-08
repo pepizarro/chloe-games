@@ -26,7 +26,9 @@
 .urge { animation: bob .5s steps(2) infinite; }
 .mine { display: flex; align-items: flex-end; justify-content: center; gap: 14px; padding: 8px 10px 14px; }
 .hand { display: flex; gap: 6px; }
-.hcard { transition: translate .1s steps(2); touch-action: none; animation: deal .45s cubic-bezier(.3, 1.4, .6, 1) both, fresh 1.2s steps(2) .45s; }
+.hcard { transition: translate .1s steps(2); touch-action: none; }
+/* on the img, not the button: the button's shake/drag classes swap animations and would replay this */
+.hcard .card { animation: deal .45s cubic-bezier(.3, 1.4, .6, 1) both, fresh 1.2s steps(2) .45s; }
 .drag { transition: none; z-index: 5; }
 .drag .card { filter: drop-shadow(0 10px 0 #0006); transform: scale(1.1); }
 .hcard:not(:disabled):hover { translate: 0 -4px; }
@@ -42,7 +44,7 @@
 .rules li + li { margin-top: 4px; }
 @keyframes land { from { transform: translateY(-30px) scale(1.2); opacity: 0; } }
 @keyframes deal { from { translate: calc(var(--cw) * 1.6) -10px; transform: rotate(12deg); opacity: 0; } }
-@keyframes fresh { 0%, 100% { filter: none; } 25%, 75% { filter: brightness(1.5) drop-shadow(0 0 4px var(--accent)); } }
+@keyframes fresh { 0%, 100% { filter: drop-shadow(0 3px 0 #0005); } 25%, 75% { filter: brightness(1.5) drop-shadow(0 0 4px var(--accent)); } }
 @keyframes shake { 0%, 100% { translate: 0; } 33% { translate: -5px; } 66% { translate: 5px; } }
 @keyframes bob { 50% { transform: translateY(-3px); } }
 @media (prefers-reduced-motion: reduce) { .screen * { animation: none !important; transition: none !important; } }

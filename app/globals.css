@@ -182,7 +182,7 @@ h2 { font-size: 10px; margin: 28px 0 8px; opacity: .7; text-transform: uppercase
 @media (prefers-reduced-motion: reduce) { .c4 * { animation: none !important; } }
 
 /* mancala — vertical wooden board */
-.mancala-wrap { width: fit-content; margin: 8px auto; }
+.mancala-wrap { width: fit-content; margin: 8px auto; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
 .mancala-name { text-align: center; margin: 0 0 12px; opacity: .6; }
 .mancala-name.own { margin: 20px 0 0; opacity: 1; color: var(--accent); }
 .mancala {

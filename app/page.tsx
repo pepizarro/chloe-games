@@ -51,7 +51,7 @@ export default function Lobby() {
       <div className="plaque">hi {me}</div>
       {bell && (
         <button className="btn gold" onClick={() => subscribePush(me).then((ok) => setBell(!ok))}>
-          🔔 tell me when it&apos;s my turn
+          activate notifications
         </button>
       )}
       <div className="list">

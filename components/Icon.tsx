@@ -1,9 +1,9 @@
 // Small pixel icons. Players get a card suit (SVG bitmap); games reuse their own board pieces (.piece / .stone from globals.css).
-const BITMAPS: Record<string, { rows: string[]; fill: string; hi: string }> = {
+const BITMAPS: Record<string, { rows: string[]; fill: string; hi: string; rim?: string }> = {
   heart: { fill: "#fe5f55", hi: "#ffb3ad", rows: [".XX..XX.", "XoXXXXXX", "XXXXXXXX", "XXXXXXXX", ".XXXXXX.", "..XXXX..", "...XX..."] },
-  clover: { fill: "#38b764", hi: "#a7f070", rows: ["...XX...", "..XoXX..", "..XXXX..", ".XXXXXX.", "XoXXXXXX", "XXXXXXXX", ".XX..XX.", "...XX...", "..XXXX.."] },
+  spade: { fill: "#15161e", hi: "#4e5a5d", rim: "#dfe6ea", rows: ["...XX...", "..XXXX..", ".XoXXXX.", "XoXXXXXX", "XXXXXXXX", "XXX.XXXX", ".X.XX.X.", "...XX...", "..XXXX.."] },
 };
-export const PLAYER_ICON: Record<string, string> = { pedro: "clover", chloe: "heart" };
+export const PLAYER_ICON: Record<string, string> = { pedro: "spade", chloe: "heart" };
 
 const STONES = [[40, 70, "#41a6f6"], [60, 72, "#f4f4f4"], [30, 50, "#38b764"], [52, 52, "#333c57"], [68, 50, "#41a6f6"], [44, 32, "#f4f4f4"]] as const;
 
@@ -17,10 +17,19 @@ export function Icon({ name }: { name: string }) {
       </i>
     );
   const b = BITMAPS[name] ?? BITMAPS.heart;
-  const w = b.rows[0].length, h = b.rows.length, path = (ch: string) =>
-    b.rows.flatMap((r, y) => [...r].map((c, x) => (c === ch ? `M${x} ${y}h1v1h-1z` : ""))).join("");
+  const w = b.rows[0].length, h = b.rows.length;
+  const at = (x: number, y: number) => b.rows[y]?.[x] ?? ".";
+  const px = (x: number, y: number) => `M${x} ${y}h1v1h-1z`;
+  const path = (ch: string) => b.rows.flatMap((r, y) => [...r].map((c, x) => (c === ch ? px(x, y) : ""))).join("");
+  // 1px rim: empty cells touching the shape (drawn 1 cell outside the bitmap too)
+  let rim = "";
+  if (b.rim)
+    for (let y = -1; y <= h; y++)
+      for (let x = -1; x <= w; x++)
+        if (at(x, y) === "." && [at(x + 1, y), at(x - 1, y), at(x, y + 1), at(x, y - 1)].some((c) => c !== ".")) rim += px(x, y);
   return (
-    <svg className="icon" viewBox={`0 0 ${w} ${h}`} shapeRendering="crispEdges" aria-hidden>
+    <svg className="icon" viewBox={`-1 -1 ${w + 2} ${h + 2}`} shapeRendering="crispEdges" aria-hidden>
+      {b.rim && <path d={rim} fill={b.rim} />}
       <path d={path("X") + path("o")} fill={b.fill} />
       <path d={path("o")} fill={b.hi} />
     </svg>

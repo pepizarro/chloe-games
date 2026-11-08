@@ -3,16 +3,19 @@ export type Found = Record<string, number>; // player -> ms from image on screen
 export type State = { round: number; ready: Record<string, number>; found: Found; results: Found[] };
 // ready[p] = highest round p agreed to play; round r runs once both are >= r. results[r] = that round's found.
 
-// ponytail: public-domain Bruegel/Bosch stand-ins. Swap for Waldo scans (public/waldo/*.jpg) and read x/y off the
-// dev console, which logs the fraction under every double-click.
-const WM = "https://upload.wikimedia.org/wikipedia/commons/thumb";
-const CG = "Pieter_Bruegel_the_Elder_-_Children%E2%80%99s_Games_-_Google_Art_Project.jpg";
-const DP = "Pieter_Brueghel_the_Elder_-_The_Dutch_Proverbs_-_Google_Art_Project.jpg";
-const GD = "The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg";
+// Scenes from github.com/vc1492a/Hey-Waldo (ODbL labels, Handford's art; private use only).
+// verified: I looked at the spot. Unverified ones are the dataset's best tile label, which is usually a look-alike:
+// find him in dev, read the fraction the console logs on double-click, paste it here and drop the flag.
+const W = (n: number, x: number, y: number, unverified = false): Target =>
+  ({ src: `/waldo/${n}.jpg`, hint: unverified ? "waldo (spot unverified, skip if stuck)" : "waldo", x, y, r: 0.03 });
 export const IMAGES: Target[] = [
-  { src: `${WM}/1/1e/${CG}/1920px-${CG}`, hint: "the kid riding the barrel", x: 0.664, y: 0.785, r: 0.04 },
-  { src: `${WM}/7/7e/${DP}/1920px-${DP}`, hint: "the woman in red with the blue cloak", x: 0.496, y: 0.651, r: 0.04 },
-  { src: `${WM}/6/6d/${GD}/1920px-${GD}`, hint: "the giraffe", x: 0.203, y: 0.281, r: 0.03 },
+  W(1, 0.355, 0.437),
+  W(9, 0.21, 0.792),
+  W(14, 0.122, 0.81),
+  W(2, 0.477, 0.219, true), W(3, 0.808, 0.094, true), W(4, 0.287, 0.75, true), W(5, 0.48, 0.219, true),
+  W(6, 0.833, 0.094, true), W(7, 0.705, 0.344, true), W(8, 0.5, 0.5, true), W(10, 0.787, 0.282, true),
+  W(11, 0.44, 0.719, true), W(12, 0.156, 0.227, true), W(13, 0.416, 0.188, true), W(15, 0.5, 0.5, true),
+  W(16, 0.597, 0.281, true), W(17, 0.764, 0.344, true), W(18, 0.77, 0.437, true), W(19, 0.184, 0.438, true),
 ];
 
 const init = (): State => ({ round: 0, ready: {}, found: {}, results: [] });

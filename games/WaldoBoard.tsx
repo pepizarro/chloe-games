@@ -20,14 +20,14 @@ export function WaldoBoard({ game, me }: { game: Game<State>; me: string }) {
   const patch = (path: string[], value: unknown) =>
     supabase.rpc("patch_state", { game_id: game.id, path, value, guard: { round: s.round } }).then(logErr);
 
-  // Both clicked next → write the following round. Guarded by round, so whichever client lands second is a no-op.
+  // Both clicked next (or skip) → write the following round. Guarded by round, so whichever client lands second is a no-op.
   useEffect(() => {
-    if (phase !== "result" || !waldo.agreed(s, players, s.round + 1)) return;
+    if (phase === "lobby" || game.winner || !waldo.agreed(s, players, s.round + 1)) return;
     const next = waldo.next(s);
     const row =
       next.round < IMAGES.length ? { state: next } : { state: next, turn: null, winner: waldo.matchWinner(next.results, players) };
     supabase.from("games").update(row).eq("id", game.id).eq("state->>round", String(s.round)).then(logErr);
-  }, [phase, s, players, game.id]);
+  }, [phase, s, players, game.id, game.winner]);
 
   return (
     <div className={css.screen}>
@@ -160,7 +160,11 @@ function Round({ target, found, me, them, last, waiting, onFound, onNext }: {
           <p>find {target.hint}</p>
         </div>
       )}
-      {live && !over && <p className={css.hint}>double-click {target.hint}</p>}
+      {live && !over && (
+        <p className={css.hint}>
+          {waiting ? `waiting for ${them} to skip…` : <>double-click {target.hint} <button className="btn dim" onClick={onNext}>skip</button></>}
+        </p>
+      )}
       {over && (
         <div className={css.sheet}>
           {Object.entries(all).sort((a, b) => a[1] - b[1]).map(([p, t]) => <p key={p}>{p === me ? "you" : p} found it in {sec(t)}</p>)}

@@ -36,4 +36,8 @@ test("phases, agreement and next-round bookkeeping", () => {
   assert.deepEqual(waldo.wins(s.results, p), [0, 1]);
   assert.equal(waldo.matchWinner(s.results, p), "b");
   assert.equal(waldo.matchWinner([...s.results, { a: 1 }], p), "draw");
+  // skipped round: nobody found, no point
+  const skipped = waldo.next({ ...s, ready: { a: 2, b: 2 } });
+  assert.deepEqual(skipped.results.at(-1), {});
+  assert.deepEqual(waldo.wins(skipped.results, p), [0, 1]);
 });

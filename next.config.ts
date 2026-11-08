@@ -4,7 +4,8 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
-  allowedDevOrigins: ["**"], // dev only; any host on the LAN (phones, 127.0.0.1 as a second player) can load the dev server
+  // dev only. Wildcards match hostnames, not IPs, so the LAN IP is listed: `ipconfig getifaddr en0`
+  allowedDevOrigins: ["**", "127.0.0.1", "192.168.4.71"],
 };
 
 export default nextConfig;

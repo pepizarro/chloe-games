@@ -17,10 +17,12 @@
 .fan { display: flex; }
 .fan .card { margin-left: calc(var(--cw) * -0.55); transform: scale(.8); transform-origin: bottom; }
 .fan .card:first-child { margin-left: 0; }
-.table { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px; }
-.table .pile:nth-child(2) { margin-left: 8px; }
-.table .pile:nth-child(3) { margin-right: 8px; }
-.table .pile:nth-child(2) .card, .table .pile:nth-child(3) .card { animation: land .25s cubic-bezier(.3, 1.6, .6, 1) both; }
+.table { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px; }
+/* centre piles: the ones you aim at, so a third bigger */
+.big { width: calc(var(--cw) * 1.35); height: calc(var(--ch) * 1.35); }
+.big .card { width: 100%; height: 100%; animation: land .25s cubic-bezier(.3, 1.6, .6, 1) both; }
+.big:nth-child(2) { margin-left: 6px; }
+.big:nth-child(3) { margin-right: 6px; }
 .flipRow { display: flex; justify-content: center; padding: 0 0 8px; }
 .flipRow .btn { font-size: 9px; padding: 8px 14px; }
 .urge { animation: bob .5s steps(2) infinite; }

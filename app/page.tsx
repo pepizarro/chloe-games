@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase, type Game } from "@/lib/supabase";
 import { other, usePlayer } from "@/lib/player";
 import { GAMES, type GameType } from "@/lib/games";
-import { Icon } from "@/components/Icon";
+import { Icon, PLAYER_ICON } from "@/components/Icon";
 
 
 export default function Lobby() {
@@ -70,7 +70,9 @@ export default function Lobby() {
               <Link key={g.id} href={`/game/${g.id}`} className="card panel waiting">
                 {glyph(g.type)}
                 <span>{GAMES[g.type as GameType]?.name ?? g.type}</span>
-                <b className={`tag ${g.winner === me ? "gold" : "dim"}`}>{g.winner === "draw" ? "draw" : `${g.winner} won`}</b>
+                <b className={`tag won ${g.winner === me ? "gold" : "dim"}`}>
+                  {g.winner === "draw" ? "draw" : <><Icon name={PLAYER_ICON[g.winner!]} /> won</>}
+                </b>
               </Link>
             ))}
           </div>

@@ -8,7 +8,7 @@
   --board: #3b5dc9;
   --px: 4px;
   /* balatro palette */
-  --felt: #14472e;
+  --felt: #123f29;
   --felt-dk: #0b2a1b;
   --slate: #2c3638;
   --slate-dk: #171f21;
@@ -44,18 +44,18 @@ body::before, body::after {
 }
 body::before {
   background:
-    radial-gradient(22% 26% at 28% 30%, #2d8f5c 0, #2d8f5c55 40%, #0000 72%),
-    radial-gradient(24% 20% at 72% 68%, #03150d 0, #0000 70%),
-    radial-gradient(18% 22% at 55% 12%, #27804f 0, #0000 70%),
+    radial-gradient(45% 55% at 28% 30%, #3fa571 0, #3fa57133 35%, #0000 75%),
+    radial-gradient(40% 45% at 72% 62%, #2f8f5c 0, #2f8f5c2a 40%, #0000 75%),
     var(--felt);
+  opacity: .55;
   animation: drift1 7s ease-in-out infinite alternate;
 }
 body::after {
   background:
-    radial-gradient(20% 24% at 62% 82%, #2f9560 0, #0000 70%),
-    radial-gradient(22% 18% at 14% 76%, #03150d 0, #0000 70%),
-    radial-gradient(16% 20% at 84% 22%, #2a8a58 0, #0000 70%),
-    radial-gradient(18% 16% at 38% 52%, #03150d 0, #0000 70%);
+    radial-gradient(42% 50% at 60% 82%, #46ad78 0, #46ad7833 35%, #0000 75%),
+    radial-gradient(38% 42% at 16% 70%, #2a865a 0, #2a865a2a 40%, #0000 75%),
+    radial-gradient(35% 40% at 84% 20%, #3a9a68 0, #3a9a6833 35%, #0000 75%);
+  opacity: .45;
   animation: drift2 5s ease-in-out infinite alternate;
 }
 @keyframes drift1 { to { transform: translate(-9%, 7%) rotate(-10deg) scale(1.15); } }

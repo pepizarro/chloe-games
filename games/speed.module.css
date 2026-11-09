@@ -2,10 +2,10 @@
   --cw: min(62px, calc((100vw - 72px) / 5)); --ch: calc(var(--cw) * 63 / 47);
   position: fixed; inset: 0; z-index: 10; display: grid; grid-template-rows: auto auto 1fr auto auto;
   background: radial-gradient(60% 50% at 50% 45%, #1d6b43 0, var(--felt) 70%);
-  padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
   user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: manipulation;
 }
-.hud { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--slate); font-size: 10px; box-shadow: 0 4px 0 #0004; z-index: 1; }
+.hud { display: flex; align-items: center; gap: 10px; padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px; background: var(--slate); font-size: 10px; box-shadow: 0 4px 0 #0004; z-index: 1; }
 .hud > span { flex: 1; text-align: right; font-size: 8px; opacity: .8; }
 .hud .btn { padding: 6px 8px; font-size: 8px; }
 .card { display: block; width: var(--cw); height: var(--ch); image-rendering: pixelated; filter: drop-shadow(0 3px 0 #0005); }

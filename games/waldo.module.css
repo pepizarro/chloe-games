@@ -1,5 +1,5 @@
-.screen { position: fixed; inset: 0; z-index: 10; background: var(--slate-dk); display: grid; grid-template-rows: auto auto 1fr; padding-top: env(safe-area-inset-top); }
-.hud { display: flex; align-items: center; gap: 12px; padding: 8px 10px; background: var(--slate); font-size: 10px; box-shadow: 0 4px 0 #0004; z-index: 1; }
+.screen { position: fixed; inset: 0; z-index: 10; background: var(--slate-dk); display: grid; grid-template-rows: auto auto 1fr; }
+.hud { display: flex; align-items: center; gap: 12px; padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px; background: var(--slate); font-size: 10px; box-shadow: 0 4px 0 #0004; z-index: 1; }
 .hud > span { flex: 1; text-align: right; }
 .hud .btn { padding: 6px 8px; font-size: 8px; }
 .sub { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 10px; min-height: 44px; }

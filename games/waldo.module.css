@@ -1,4 +1,4 @@
-.screen { position: fixed; inset: 0; z-index: 10; background: var(--slate-dk); display: grid; grid-template-rows: auto auto 1fr; }
+.screen { position: fixed; inset: 0; z-index: 10; background: var(--slate-dk); display: grid; grid-template-rows: auto auto 1fr; padding-top: env(safe-area-inset-top); }
 .hud { display: flex; align-items: center; gap: 12px; padding: 8px 10px; background: var(--slate); font-size: 10px; box-shadow: 0 4px 0 #0004; z-index: 1; }
 .hud > span { flex: 1; text-align: right; }
 .hud .btn { padding: 6px 8px; font-size: 8px; }
@@ -16,7 +16,7 @@
 .center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: 8px; }
 .hint { position: absolute; left: 50%; bottom: 12px; translate: -50%; margin: 0; padding: 6px 12px; background: #000a; border-radius: 8px; font-size: 10px; max-width: 90%; pointer-events: none; }
 .sheet {
-  position: absolute; left: 0; right: 0; bottom: 0; padding: 16px; background: var(--slate); box-shadow: 0 -4px 0 var(--slate-dk);
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); background: var(--slate); box-shadow: 0 -4px 0 var(--slate-dk);
   text-align: center; display: grid; gap: 8px; justify-items: center;
 }
 .sheet p { margin: 0; }

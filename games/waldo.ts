@@ -1,6 +1,8 @@
 export type Target = { src: string; hint: string; x: number; y: number; r: number }; // x,y: fraction of width/height; r: fraction of width
 export type Found = Record<string, number>; // player -> ms from image on screen to double-click
-export type State = { round: number; ready: Record<string, number>; found: Found; results: Found[]; stop?: Record<string, boolean> };
+export type State = { round: number; ready: Record<string, number>; found: Found; results: Found[]; stop?: Record<string, boolean>; votes?: Record<string, number> };
+// votes[p] = best-of the player wants (3 or 5); the match length is set once both agree.
+export const BEST_OF = [3, 5];
 // ready[p] = highest round p agreed to play; round r runs once both are >= r. results[r] = that round's found.
 
 // Scenes 1-19: github.com/vc1492a/Hey-Waldo. 20-29: github.com/tadejmagajna/HereIsWally. 40-49: vuss.io (Handford's art; private use only).
@@ -20,7 +22,17 @@ export const IMAGES: Target[] = [
   W(16, 0.597, 0.281, true), W(42, 0.5, 0.5, true), W(49, 0.5, 0.5, true),
 ];
 
-const init = (): State => ({ round: 0, ready: {}, found: {}, results: [], stop: {} });
+const init = (): State => ({ round: 0, ready: {}, found: {}, results: [], stop: {}, votes: {} });
+
+/** Agreed match length, or null while the votes differ / are missing. */
+const best = (s: State, players: string[]): number | null => {
+  const v = players.map((p) => s.votes?.[p]);
+  return v[0] && v[0] === v[1] ? v[0] : null;
+};
+
+/** Match decided: all rounds played, or someone has more than half of them. */
+const over = (results: Found[], players: string[], n: number) =>
+  results.length >= n || Math.max(...wins(results, players)) > n / 2;
 
 /** Is the double-click at (fx, fy) on the target? aspect = image height / width, so the radius is round on screen. */
 const hit = (t: Target, fx: number, fy: number, aspect: number) => Math.hypot(fx - t.x, (fy - t.y) * aspect) <= t.r;
@@ -50,4 +62,4 @@ const phase = (s: State, players: string[]): "lobby" | "play" | "result" =>
 /** Next round, carrying this round's times into results. */
 const next = (s: State): State => ({ round: s.round + 1, ready: s.ready, found: {}, results: [...s.results, s.found] });
 
-export const waldo = { init, hit, roundWinner, wins, matchWinner, agreed, stopped, phase, next };
+export const waldo = { init, hit, roundWinner, wins, matchWinner, agreed, stopped, phase, next, best, over };

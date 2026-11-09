@@ -44,3 +44,21 @@ test("phases, agreement and next-round bookkeeping", () => {
   assert.ok(waldo.stopped({ ...s, stop: { a: true, b: true } }, p));
   assert.ok(!waldo.stopped(waldo.init(), p)); // old rows without stop
 });
+
+test("best-of: both must agree; match ends on majority or when rounds run out", () => {
+  const p = ["a", "b"];
+  let s = waldo.init();
+  assert.equal(waldo.best(s, p), null);
+  s = { ...s, votes: { a: 3 } };
+  assert.equal(waldo.best(s, p), null);
+  s = { ...s, votes: { a: 3, b: 5 } };
+  assert.equal(waldo.best(s, p), null);
+  s = { ...s, votes: { a: 5, b: 5 } };
+  assert.equal(waldo.best(s, p), 5);
+  const aWin = { a: 100, b: 200 }, bWin = { a: 300, b: 200 }, tie = { a: 100, b: 100 };
+  assert.ok(!waldo.over([aWin, bWin], p, 3));
+  assert.ok(waldo.over([aWin, aWin], p, 3), "2 of 3");
+  assert.ok(waldo.over([aWin, bWin, tie], p, 3), "all played");
+  assert.ok(!waldo.over([aWin, aWin], p, 5));
+  assert.ok(waldo.over([aWin, aWin, aWin], p, 5), "3 of 5");
+});

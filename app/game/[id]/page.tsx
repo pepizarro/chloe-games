@@ -5,6 +5,7 @@ import { supabase, type Game } from "@/lib/supabase";
 import { other, usePlayer } from "@/lib/player";
 import { notify } from "@/lib/push";
 import { GAMES, type GameType, type Move } from "@/lib/games";
+import { useCelebrate } from "@/components/Celebrate";
 
 const REPLAY_DELAY = 900; // ms the board sits at the pre-move state before the opponent's move animates in
 
@@ -12,6 +13,7 @@ export default function Room() {
   const { id } = useParams<{ id: string }>();
   const me = usePlayer()!;
   const [game, setGame] = useState<Game | null>(null);
+  useCelebrate(game?.winner, me);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;

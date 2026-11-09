@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 import { supabase, type Game } from "@/lib/supabase";
-import { IMAGES, waldo, type Found, type State, type Target } from "./waldo";
+import { BEST_OF, IMAGES, waldo, type Found, type State, type Target } from "./waldo";
 import css from "./waldo.module.css";
 
 const COUNTDOWN = 3;
@@ -16,6 +16,7 @@ export function WaldoBoard({ game, me }: { game: Game<State>; me: string }) {
   const phase = game.winner ? "done" : waldo.phase(s, players);
   const score = players.map((p, i) => `${p} ${waldo.wins(s.results, players)[i]}`).join(" · ");
   const readyFor = (p: string) => s.ready[p] ?? -1;
+  const best = waldo.best(s, players);
 
   const patch = (path: string[], value: unknown) =>
     supabase.rpc("patch_state", { game_id: game.id, path, value, guard: { round: s.round } }).then(logErr);
@@ -28,11 +29,11 @@ export function WaldoBoard({ game, me }: { game: Game<State>; me: string }) {
     if (!stop && (phase === "lobby" || !waldo.agreed(s, players, s.round + 1))) return;
     const next = waldo.next(s);
     const row =
-      !stop && next.round < IMAGES.length
+      !stop && next.round < IMAGES.length && !waldo.over(next.results, players, best ?? IMAGES.length)
         ? { state: next }
         : { state: next, turn: null, winner: waldo.matchWinner(next.results, players) };
     supabase.from("games").update(row).eq("id", game.id).eq("state->>round", String(s.round)).then(logErr);
-  }, [phase, s, players, game.id, game.winner]);
+  }, [phase, s, players, game.id, game.winner, best]);
 
   const iStop = !!s.stop?.[me];
   const theyStop = !!s.stop?.[them];
@@ -41,7 +42,7 @@ export function WaldoBoard({ game, me }: { game: Game<State>; me: string }) {
     <div className={css.screen}>
       <header className={css.hud}>
         <Link href="/" className="btn red">◂</Link>
-        <b>{Math.min(s.round + 1, IMAGES.length)}/{IMAGES.length}</b>
+        <b>{Math.min(s.round + 1, best ?? IMAGES.length)}/{best ?? "?"}</b>
         <span>{score}</span>
         {!game.winner && (
           <button className={`btn ${iStop ? "dim" : "red"}`} onClick={() => patch(["stop", me], !iStop)}>
@@ -49,9 +50,23 @@ export function WaldoBoard({ game, me }: { game: Game<State>; me: string }) {
           </button>
         )}
       </header>
-      {phase === "lobby" && (
+      {phase === "lobby" && !best && (
         <div className={css.sheet}>
-          <p>both of you have to be in.</p>
+          <p>how long a match?{s.votes?.[them] ? ` ${them} says best of ${s.votes[them]}.` : ""}</p>
+          <div className="row" style={{ justifyContent: "center" }}>
+            {BEST_OF.map((n) => (
+              <button key={n} className={`btn ${s.votes?.[me] === n ? "gold" : s.votes?.[them] === n ? "orange" : "blue"}`} onClick={() => patch(["votes", me], n)}>
+                best of {n}{s.votes?.[me] === n ? " ✓" : ""}
+              </button>
+            ))}
+          </div>
+          {s.votes?.[me] && !s.votes?.[them] && <p className="tag dim">waiting for {them} to pick…</p>}
+          {s.votes?.[me] && s.votes?.[them] && s.votes[me] !== s.votes[them] && <p className="tag red">you disagree. one of you, switch.</p>}
+        </div>
+      )}
+      {phase === "lobby" && best && (
+        <div className={css.sheet}>
+          <p>best of {best}. both of you have to be in.</p>
           {readyFor(me) >= s.round ? (
             <p className="tag dim">waiting for {them}…</p>
           ) : (

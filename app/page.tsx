@@ -83,13 +83,12 @@ export default function Lobby() {
             </Link>
           );
         })}
+        <Link href="/elsewhere" className="card panel">
+          {glyph("elsewhere")}
+          <span>elsewhere<small>games to remember</small></span>
+          <b className="tag dim">open</b>
+        </Link>
       </div>
-
-      <Link href="/elsewhere" className="card panel">
-        {glyph("elsewhere")}
-        <span>elsewhere<small>games to remember</small></span>
-        <b className="tag dim">open</b>
-      </Link>
 
       {done.length > 0 && (
         <>

@@ -14,10 +14,6 @@ export default function Lobby() {
   const router = useRouter();
   const [games, setGames] = useState<Game[]>([]);
   const [enabled, setEnabled] = useState<GameType[]>([]); // toggled in the game_types table
-  const [ext, setExt] = useState<{ id: string; name: string; url: string | null }[]>([]); // games to play elsewhere
-  const [newName, setNewName] = useState("");
-  const [newUrl, setNewUrl] = useState("");
-  const loadExt = () => supabase.from("external_games").select("id, name, url").order("created_at").then(({ data }) => setExt(data ?? []));
   const [bell, setBell] = useState<boolean | null>(null); // null = unsupported / not checked yet
 
   useEffect(() => {
@@ -34,7 +30,6 @@ export default function Lobby() {
   useEffect(() => {
     supabase.from("game_types").select("type").eq("enabled", true)
       .then(({ data }) => setEnabled((data ?? []).map((r) => r.type).filter((t): t is GameType => t in GAMES)));
-    loadExt();
     const load = () =>
       supabase.from("games").select().order("updated_at", { ascending: false }).then(({ data }) => setGames(data ?? []));
     load();
@@ -54,17 +49,6 @@ export default function Lobby() {
     if (error) return alert(error.message);
     router.push(`/game/${data.id}`);
   }
-
-  async function addExt(e: React.FormEvent) {
-    e.preventDefault();
-    const name = newName.trim();
-    if (!name) return;
-    const url = newUrl.trim() ? (/^https?:\/\//.test(newUrl.trim()) ? newUrl.trim() : `https://${newUrl.trim()}`) : null;
-    await supabase.from("external_games").insert({ name, url });
-    setNewName(""); setNewUrl("");
-    loadExt();
-  }
-  const delExt = (id: string) => supabase.from("external_games").delete().eq("id", id).then(loadExt);
 
   const done = games.filter((g) => g.winner);
   const glyph = (t: string) => <Icon name={t} />;
@@ -101,20 +85,11 @@ export default function Lobby() {
         })}
       </div>
 
-      <h2>elsewhere</h2>
-      <div className="list">
-        {ext.map((g) => (
-          <div key={g.id} className="card panel ext">
-            {g.url ? <a href={g.url} target="_blank" rel="noreferrer">{g.name} ↗</a> : <span>{g.name}</span>}
-            <button className="btn dim tag" onClick={() => delExt(g.id)} aria-label={`remove ${g.name}`}>✕</button>
-          </div>
-        ))}
-        <form className="card panel ext add" onSubmit={addExt}>
-          <input className="input" placeholder="game" value={newName} onChange={(e) => setNewName(e.target.value)} required />
-          <input className="input" placeholder="link (optional)" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} inputMode="url" />
-          <button className="btn blue tag" type="submit">+ add</button>
-        </form>
-      </div>
+      <Link href="/elsewhere" className="card panel">
+        {glyph("elsewhere")}
+        <span>elsewhere<small>games to remember</small></span>
+        <b className="tag dim">open</b>
+      </Link>
 
       {done.length > 0 && (
         <>

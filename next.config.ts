@@ -4,8 +4,8 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
-  // dev only. Wildcards match hostnames, not IPs, so the LAN IP is listed: `ipconfig getifaddr en0`
-  allowedDevOrigins: ["**", "127.0.0.1", "192.168.4.71", "192.168.0.8"],
+  // dev only: any LAN IP (four wildcard labels match any IPv4) and any .local mDNS name. localhost is allowed by default.
+  allowedDevOrigins: ["*.*.*.*", "**.local"],
 };
 
 export default nextConfig;

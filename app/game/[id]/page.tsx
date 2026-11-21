@@ -62,7 +62,7 @@ export default function Room() {
     <>
       <div className="plaque">{def.name}</div>
       <div key={status} className={`status ${tone}`}>{status}</div>
-      <def.Board game={game as never} me={me} play={play} />
+      <def.Board key={game.id} game={game as never} me={me} play={play} />
     </>
   );
 }

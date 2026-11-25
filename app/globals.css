@@ -33,11 +33,12 @@
 }
 * { box-sizing: border-box; }
 /* same tone as the felt layers blended over it, so any strip iOS leaves uncovered (safe area, overscroll) is invisible */
-html { background: color-mix(in srgb, var(--felt) 55%, var(--felt-dk)); min-height: 100%; }
+/* overflow-x on html, not only body: iOS lets the oversized fixed felt layers below widen the page otherwise */
+html { background: color-mix(in srgb, var(--felt) 55%, var(--felt-dk)); min-height: 100%; overflow-x: hidden; }
 html, body { margin: 0; color: var(--ink); }
 body {
   font-family: var(--font-pixel), monospace; font-size: 12px; line-height: 1.8; image-rendering: pixelated;
-  overflow-x: hidden; -webkit-tap-highlight-color: transparent;
+  overflow-x: clip; -webkit-tap-highlight-color: transparent;
 }
 /* swirling felt: two blob layers drifting on different clocks */
 body::before, body::after {
@@ -97,7 +98,12 @@ h2 { font-size: 10px; margin: 28px 0 8px; opacity: .7; text-transform: uppercase
 @keyframes bob { 50% { transform: translateY(-3px); } }
 @keyframes shine { 50% { filter: brightness(1.35); } }
 
-.topbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; margin-bottom: 16px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; margin-bottom: 16px; }
+/* never wider than the bar: the lobby button keeps its size, the name gives way first */
+.topbar > a { flex: none; }
+.topbar .who { min-width: 0; flex-wrap: nowrap; }
+.topbar .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topbar .who .btn { flex: none; }
 
 /* icons */
 .icon { flex: none; width: 44px; height: 44px; display: block; position: relative; }
@@ -122,6 +128,10 @@ h2 { font-size: 10px; margin: 28px 0 8px; opacity: .7; text-transform: uppercase
 .card:hover { translate: 0 -2px; }
 .card.live { box-shadow: 0 4px 0 var(--slate-dk), inset 0 0 0 3px var(--blue); }
 .card.live .tag { animation: bob 1s steps(2) infinite; }
+/* the other player is in and waiting on me: gold, and it pulses */
+.card.call { box-shadow: 0 4px 0 var(--slate-dk), inset 0 0 0 3px var(--accent); animation: call 1s steps(2) infinite; }
+.card.call small { opacity: 1; color: var(--accent); }
+@keyframes call { 50% { box-shadow: 0 4px 0 var(--slate-dk), inset 0 0 0 3px var(--accent), 0 0 0 5px #ffcd7566; translate: 0 -3px; } }
 .card.waiting { opacity: .55; }
 .card.waiting .icon { filter: grayscale(.8); }
 .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -145,7 +155,36 @@ h2 { font-size: 10px; margin: 28px 0 8px; opacity: .7; text-transform: uppercase
 .pick:hover { translate: 0 -3px; }
 .pick:active { translate: 0 3px; box-shadow: 0 1px 0 color-mix(in srgb, var(--c), #000 40%); }
 
-@media (prefers-reduced-motion: reduce) { body::before, body::after, .status, .tag { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { body::before, body::after, .status, .tag, .card.call, .flag .strip { animation: none !important; } }
+
+/* surrender: white flag (see components/Surrender.tsx), confirm modal, and the flag raised when someone gives up */
+.flag { --u: 6px; --pole: 13; display: inline-flex; align-items: flex-start; height: calc(var(--u) * var(--pole)); }
+.flag .pole { width: var(--u); height: 100%; background: var(--gold); box-shadow: inset calc(var(--u) / -2) 0 #7a5f22, 0 calc(var(--u) * -1) #e9c66b; }
+.flag .strip {
+  width: var(--u); height: calc(var(--u) * 6); margin-top: var(--u); background: #f4f4f4;
+  box-shadow: inset 0 calc(var(--u) * -1) #c5d4de, 0 var(--u) #0003;
+  animation: wave .9s step-end infinite;
+}
+.flag.mini { --u: 2px; --pole: 8; }
+.flag.mini .strip { animation: none; } /* the button icon stays still; only the modal and the raised flag wave */
+@keyframes wave {
+  0%, 50% { translate: 0 0; }
+  25% { translate: 0 calc(var(--u) * -1 * var(--a)); }
+  75% { translate: 0 calc(var(--u) * var(--a)); }
+}
+.giveup { display: inline-flex; align-items: center; }
+.bell .flag.mini { --u: 3px; }
+.modal { border: 0; padding: 0; background: none; color: var(--ink); font: inherit; max-width: min(340px, calc(100vw - 32px)); overflow: visible; }
+.modal::backdrop { background: #000b; }
+.modal .panel { display: grid; justify-items: center; gap: 12px; padding: 24px 18px 20px; text-align: center; }
+.modal p { margin: 0 0 6px; display: grid; gap: 6px; font-size: 14px; }
+.modal small { font-size: 9px; opacity: .7; }
+.surrendered {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-content: center; justify-items: center; gap: 20px;
+  background: #000c; animation: pop .35s cubic-bezier(.3, 1.6, .6, 1) both;
+}
+.surrendered .flag { --u: 12px; }
+.surrendered .plaque { margin: 0; }
 
 /* connect 4 — 10x10 pixel-art circle, reused for holes and pieces */
 .c4 {

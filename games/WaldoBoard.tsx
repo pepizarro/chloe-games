@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { supabase, type Game } from "@/lib/supabase";
 import { BEST_OF, IMAGES, waldo, type Found, type State, type Target } from "./waldo";
 import css from "./waldo.module.css";
@@ -9,7 +9,7 @@ const COUNTDOWN = 3;
 const sec = (ms: number) => (ms / 1000).toFixed(2) + "s";
 const logErr = ({ error }: { error: unknown }) => error && console.error(error);
 
-export function WaldoBoard({ game, me }: { game: Game<State>; me: string }) {
+export function WaldoBoard({ game, me, surrender }: { game: Game<State>; me: string; surrender?: ReactNode }) {
   const s = game.state;
   const { players } = game;
   const them = players.find((p) => p !== me)!;
@@ -44,6 +44,7 @@ export function WaldoBoard({ game, me }: { game: Game<State>; me: string }) {
         <Link href="/" className="btn red">◂</Link>
         <b>{Math.min(s.round + 1, best ?? IMAGES.length)}/{best ?? "?"}</b>
         <span>{score}</span>
+        {surrender}
         {!game.winner && (
           <button className={`btn ${iStop ? "dim" : "red"}`} onClick={() => patch(["stop", me], !iStop)}>
             {iStop ? "stop?" : theyStop ? `${them} wants to stop` : "stop"}

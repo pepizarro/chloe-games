@@ -4,15 +4,17 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase, type Game } from "@/lib/supabase";
 import { other, usePlayer } from "@/lib/player";
-import { GAMES, type GameType } from "@/lib/games";
+import { GAMES, waitingOn, type GameType } from "@/lib/games";
 import { Icon, PLAYER_ICON } from "@/components/Icon";
 import { hasPush, pushSupported, subscribePush, unsubscribePush } from "@/lib/push";
+import { useWhere } from "@/lib/presence";
 
 
 export default function Lobby() {
   const me = usePlayer()!;
   const router = useRouter();
   const [games, setGames] = useState<Game[]>([]);
+  const theirs = useWhere(me, ""); // games the other player has open right now
   const [enabled, setEnabled] = useState<GameType[]>([]); // toggled in the game_types table
   const [bell, setBell] = useState<boolean | null>(null); // null = unsupported / not checked yet
 
@@ -74,12 +76,21 @@ export default function Lobby() {
                 <b className="tag blue">+ new</b>
               </button>
             );
-          const mine = g.turn === me;
+          const { on, joint } = waitingOn(g);
+          const them = other(me);
+          const mine = on.includes(me);
+          const here = theirs.includes(g.id); // they have it open this very moment
+          const call = here || (joint && mine && !on.includes(them)); // they are in and it only needs me
+          const note = here ? `${them} is in there now!`
+            : !mine ? `waiting for ${them}`
+            : call ? `${them} is waiting for you!`
+            : joint ? "both of you are up"
+            : g.last_by && g.last_by !== me ? "they played, go!" : "your move";
           return (
-            <Link key={t} href={`/game/${g.id}`} className={`card panel ${mine ? "live" : "waiting"}`}>
+            <Link key={t} href={`/game/${g.id}`} className={`card panel ${call ? "live call" : mine ? "live" : "waiting"}`}>
               {glyph(t)}
-              <span>{GAMES[t].name}<small>{!mine ? `waiting for ${g.turn}` : g.last_by && g.last_by !== me ? "they played, go!" : "your move"}</small></span>
-              <b className={`tag ${mine ? "blue" : "dim"}`}>{mine ? "your turn" : "…"}</b>
+              <span>{GAMES[t].name}<small>{note}</small></span>
+              <b className={`tag ${call ? "gold" : mine ? "blue" : "dim"}`}>{call ? "join!" : mine ? "your turn" : "…"}</b>
             </Link>
           );
         })}

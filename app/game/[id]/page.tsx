@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { supabase, type Game } from "@/lib/supabase";
 import { other, usePlayer } from "@/lib/player";
 import { notify } from "@/lib/push";
-import { GAMES, type GameType, type Move } from "@/lib/games";
+import { useWhere } from "@/lib/presence";
+import { GAMES, waitingOn, type GameDef, type GameType, type Move } from "@/lib/games";
 import { useCelebrate } from "@/components/Celebrate";
+import { Surrender, Surrendered, useSurrendered } from "@/components/Surrender";
 
 const REPLAY_DELAY = 900; // ms the board sits at the pre-move state before the opponent's move animates in
 
@@ -14,6 +16,10 @@ export default function Room() {
   const me = usePlayer()!;
   const [game, setGame] = useState<Game | null>(null);
   useCelebrate(game?.winner, me);
+  const present = useWhere(me, id).includes(id);
+  // who gave up, if anyone: kept in the game's own state so both players (and a later visit) can tell
+  const gaveUp = (game?.state as { surrendered?: string } | undefined)?.surrendered;
+  const [flag, lowerFlag] = useSurrendered(game?.winner, gaveUp);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
@@ -50,19 +56,36 @@ export default function Room() {
     else if (data.turn !== me) notify(other(me), name, `${me} played, your turn`, `/game/${id}`); // not on a mancala extra turn
   }
 
+  // Works on either player's turn. Two steps: mark who gave up (atomic patch, so a move landing at the same moment
+  // is not clobbered), then end the game; .is("winner", null) makes a second click or a just-finished game a no-op.
+  async function surrender() {
+    if (!game || game.winner) return;
+    await supabase.rpc("patch_state", { game_id: id, path: ["surrendered"], value: me });
+    const { data } = await supabase.from("games").update({ winner: other(me), turn: null }).eq("id", id).is("winner", null).select().single();
+    if (!data) return;
+    setGame(data);
+    notify(other(me), GAMES[game.type as GameType].name, `${me} surrendered, you win!`, `/game/${id}`);
+  }
+
   if (!game) return <p className="panel">shuffling…</p>;
-  const def = GAMES[game.type as GameType];
+  const def: GameDef<any> | undefined = GAMES[game.type as GameType];
   if (!def) return <p className="panel">unknown game: {game.type}</p>;
 
   const [status, tone] = game.winner
     ? game.winner === "draw" ? ["draw!", "gold"] : game.winner === me ? ["you won!", "gold"] : [`${game.winner} won`, "red"]
-    : game.turn === me ? ["your turn", "blue"] : [`waiting for ${game.turn}…`, "dim"];
+    : waitingOn(game).on.includes(me) ? ["your turn", "blue"] : [`waiting for ${other(me)}…`, "dim"];
+
+  const giveUp = !game.winner && <Surrender them={other(me)} bar={!def.ownHud} onSurrender={surrender} />;
 
   return (
     <>
-      <div className="plaque">{def.name}</div>
+      <div className="row" style={{ margin: "8px 0 16px" }}>
+        <div className="plaque" style={{ flex: 1, margin: 0 }}>{def.name}</div>
+        {!def.ownHud && giveUp}
+      </div>
       <div key={status} className={`status ${tone}`}>{status}</div>
-      <def.Board key={game.id} game={game as never} me={me} play={play} />
+      <def.Board key={game.id} game={game as never} me={me} play={play} surrender={giveUp} present={present} />
+      {flag && gaveUp && <Surrendered by={gaveUp} me={me} onClose={lowerFlag} />}
     </>
   );
 }

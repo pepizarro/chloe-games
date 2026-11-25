@@ -62,3 +62,19 @@ test("best-of: both must agree; match ends on majority or when rounds run out", 
   assert.ok(!waldo.over([aWin, aWin], p, 5));
   assert.ok(waldo.over([aWin, aWin, aWin], p, 5), "3 of 5");
 });
+
+test("waiting: the one who has not voted / readied / tapped next; both while searching", () => {
+  const p = ["a", "b"];
+  let s = waldo.init();
+  assert.deepEqual(waldo.waiting(s, p), ["a", "b"]);
+  s = { ...s, votes: { a: 3 } };
+  assert.deepEqual(waldo.waiting(s, p), ["b"], "a picked, b has not");
+  s = { ...s, votes: { a: 3, b: 5 } };
+  assert.deepEqual(waldo.waiting(s, p), ["a", "b"], "disagree: either can switch");
+  s = { ...s, votes: { a: 3, b: 3 }, ready: { a: 0 } };
+  assert.deepEqual(waldo.waiting(s, p), ["b"], "a is ready and waiting");
+  s = { ...s, ready: { a: 0, b: 0 } };
+  assert.deepEqual(waldo.waiting(s, p), ["a", "b"], "searching");
+  s = { ...s, found: { a: 900 }, ready: { a: 0, b: 1 } };
+  assert.deepEqual(waldo.waiting(s, p), ["a"], "b tapped next");
+});

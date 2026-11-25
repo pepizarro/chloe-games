@@ -62,4 +62,16 @@ const phase = (s: State, players: string[]): "lobby" | "play" | "result" =>
 /** Next round, carrying this round's times into results. */
 const next = (s: State): State => ({ round: s.round + 1, ready: s.ready, found: {}, results: [...s.results, s.found] });
 
-export const waldo = { init, hit, roundWinner, wins, matchWinner, agreed, stopped, phase, next, best, over };
+/** Who has something to do: pick a match length, tap ready, look for him, or tap next. */
+function waiting(s: State, players: string[]): string[] {
+  if (!best(s, players)) {
+    const undecided = players.filter((p) => !s.votes?.[p]);
+    return undecided.length ? undecided : players; // both voted but disagree: either can switch
+  }
+  const ph = phase(s, players);
+  if (ph === "play") return players;
+  const need = ph === "lobby" ? s.round : s.round + 1;
+  return players.filter((p) => (s.ready[p] ?? -1) < need);
+}
+
+export const waldo = { init, waiting, hit, roundWinner, wins, matchWinner, agreed, stopped, phase, next, best, over };

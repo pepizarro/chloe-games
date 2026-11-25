@@ -88,4 +88,7 @@ const winner = (s: State): number | null => {
   return w ?? null;
 };
 
-export const speed = { init, started, canPlay, targets, stuck, ready, play, requestFlip, winner, adjacent };
+/** Before the deal: whoever has not tapped ready. Once started both play at once, so both. */
+const waiting = (s: State, players: string[]) => (started(s) ? players : players.filter((_, i) => !s.ready[i]));
+
+export const speed = { init, waiting, started, canPlay, targets, stuck, ready, play, requestFlip, winner, adjacent };

@@ -1,0 +1,61 @@
+.wrap { display: grid; gap: 8px; justify-items: center; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.label { margin: 4px 0 0; font-size: 10px; display: flex; align-items: center; gap: 10px; }
+.note { margin: 0; font-size: 9px; text-align: center; opacity: .8; min-height: 2em; }
+
+.sea {
+  --cell: min(40px, calc((100vw - 48px) / 10));
+  position: relative; display: grid; grid-template-columns: repeat(10, var(--cell)); margin: 4px;
+  /* checkered water + the same notched pixel frame as the connect 4 board */
+  background: repeating-conic-gradient(#3b5dc9 0 25%, #3556bd 0 50%) 0 0 / calc(var(--cell) * 2) calc(var(--cell) * 2);
+  box-shadow: 0 -4px #29366f, 0 4px #29366f, -4px 0 #29366f, 4px 0 #29366f, 0 12px #10111c;
+}
+.small { --cell: min(24px, calc((100vw - 48px) / 10)); }
+
+.cell { position: relative; z-index: 1; width: var(--cell); height: var(--cell); padding: 0; border: 0; background: none; font: inherit; }
+.cell:not(:disabled) { cursor: pointer; }
+.cell:not(:disabled):hover, .cell:focus-visible { outline: none; background: #fff3; }
+.cell::after { content: ""; position: absolute; }
+.miss::after { inset: 36%; background: #c5d4de; box-shadow: 0 2px #29366f; animation: splash .4s steps(4) both; }
+.hit::after { inset: 30%; background: var(--red); box-shadow: inset 0 0 0 calc(var(--cell) * .1) var(--orange); animation: splash .4s steps(4) both; }
+.last { background: #fff2; z-index: 4; animation: flash .5s var(--fall) steps(5); }
+/* the newest shot: a bomb falls onto the cell, then the cell flashes and its marker pops in */
+.sea { --fall: .5s; }
+.last::before {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0;
+  background: url(/battleship/bomb.png) center / auto 80% no-repeat; image-rendering: pixelated;
+  animation: drop var(--fall) cubic-bezier(.6, 0, 1, .7);
+}
+.last.miss::after, .last.hit::after { animation-delay: var(--fall); }
+.aim { background: #ffcd7555; box-shadow: inset 0 0 0 3px var(--accent); animation: blink .8s steps(1) infinite; }
+
+/* a len x 1 strip with the bow in the first cell; .v turns it about that cell so it runs down instead */
+.ship {
+  position: absolute; pointer-events: none; --sh: 0 3px 0 #0005; --tone: brightness(1);
+  left: calc(var(--x) * var(--cell)); top: calc(var(--y) * var(--cell));
+  width: calc(var(--len) * var(--cell)); height: var(--cell);
+  background: center / 100% 100% no-repeat; image-rendering: pixelated;
+  transform-origin: calc(var(--cell) / 2) calc(var(--cell) / 2);
+  filter: var(--tone) drop-shadow(var(--sh)); /* the shadow turns with the ship, so .v aims it sideways to land below */
+  transition: left .1s steps(3), top .1s steps(3), rotate .15s steps(4), scale .1s steps(2);
+}
+.v { rotate: 90deg; --sh: 3px 0 0 #0005; }
+.sunk { --tone: brightness(.5) saturate(.4); }
+.lift { scale: 1.1; z-index: 2; --sh: 0 8px 0 #0004; }
+.lift.v { --sh: 8px 0 0 #0004; }
+.placing { touch-action: none; cursor: grab; }
+.placing:active { cursor: grabbing; }
+.placing .cell { pointer-events: none; }
+
+.tally { display: inline-flex; gap: 3px; align-items: center; }
+.tally i { height: 7px; background: #94b0c2; border-radius: 2px; }
+.tally .dead { background: var(--red); opacity: .7; }
+
+@keyframes splash { from { scale: 2.6; opacity: 0; } }
+@keyframes drop {
+  from { translate: 0 calc(var(--cell) * -6); scale: 1.8; opacity: 1; }
+  99% { opacity: 1; }
+  to { translate: 0 0; scale: .8; opacity: 0; }
+}
+@keyframes flash { from { background: #fffd; box-shadow: 0 0 0 calc(var(--cell) * .5) #ffcd7588; } }
+@keyframes blink { 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) { .sea *, .sea *::before, .sea *::after { animation: none !important; } }

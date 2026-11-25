@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { supabase, type Game } from "@/lib/supabase";
 import { img, speed, type State } from "./speed";
 import css from "./speed.module.css";
@@ -10,7 +10,7 @@ const BACK = "/cards/back.png";
 type Intent = (s: State) => State | null; // a move, replayable on whatever the freshest state turns out to be
 const newer = (a: State, b: State | null) => (b && b.v > a.v ? b : a);
 
-export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
+export function SpeedBoard({ game, me, surrender, present }: { game: Game<State>; me: string; surrender?: ReactNode; present?: boolean }) {
   const seat = game.players.indexOf(me), them = 1 - seat, themName = game.players[them] ?? "…";
   const server = game.state;
   // Three views of the game, newest `v` wins: the db row (slow: write -> WAL -> realtime), my own landed writes,
@@ -31,6 +31,7 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
   const s = useMemo(() => pending.reduce((st, f) => f(st) ?? st, newer(newer(server, acked), peer)), [server, acked, peer, pending]);
   const started = speed.started(s);
   const done = !!game.winner;
+  const live = started && !done && !!present; // no playing against an empty chair: both have to have the game open
 
   // which centre piles are topped by a card the opponent just played (it was in their hand a moment ago; flips aren't)
   const [seen, setSeen] = useState({ s, theirs: [false, false] });
@@ -91,11 +92,12 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
 
   function playCard(card: number, pile: number) {
     setSel(null);
+    if (!live) return;
     if (speed.play(s, seat, card, pile)) act((f) => speed.play(f, seat, card, pile));
   }
 
   function tapHand(card: number) {
-    if (done) return;
+    if (!live) return;
     const t = speed.targets(s, card);
     if (t.length === 0) return setShake(card);
     if (t.length === 1) return playCard(card, t[0]);
@@ -128,7 +130,7 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
     else setShake(card);
   }
   const tapPile = (pile: number) => sel !== null && speed.canPlay(s, sel, pile) && playCard(sel, pile);
-  const flip = () => !s.flip[seat] && act((f) => (f.flip[seat] ? null : speed.requestFlip(f, seat)));
+  const flip = () => live && !s.flip[seat] && act((f) => (f.flip[seat] ? null : speed.requestFlip(f, seat)));
 
   const setPile = (at: number) => (el: HTMLButtonElement | null) => void (piles.current[at] = el);
 
@@ -138,6 +140,7 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
         <Link href="/" className="btn red">◂</Link>
         <b>speed</b>
         <span>{themName}: {s.hands[them].length + s.draws[them].length} · you: {s.hands[seat].length + s.draws[seat].length}</span>
+        {surrender}
         <button className="btn gold" onClick={() => setRules(true)} aria-label="rules">?</button>
       </header>
 
@@ -154,7 +157,7 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
         <Pile cards={s.center[1]} up={started} cls={pileCls(1)} onClick={() => tapPile(1)} refEl={setPile(1)} />
         <Pile cards={s.side[1]} up={false} />
       </div>
-      {started && !done && (
+      {live && (
         <div className={css.flipRow}>
           <button className={`btn ${s.flip[seat] ? "dim" : s.flip[them] ? "orange" : "blue"} ${s.flip[them] && !s.flip[seat] ? css.urge : ""}`} onClick={flip}>
             {s.flip[seat] ? `waiting for ${themName}…` : s.flip[them] ? `${themName} wants to flip!` : "flip"}
@@ -174,7 +177,7 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
               onPointerUp={(e) => up(e, c)}
               onPointerCancel={() => (start.current = null, setDrag(null))}
               onAnimationEnd={() => shake === c && setShake(null)}
-              disabled={!started || done}
+              disabled={!live}
             >
               <img className={css.card} src={img(c)} alt="" draggable={false} />
             </button>
@@ -193,6 +196,12 @@ export function SpeedBoard({ game, me }: { game: Game<State>; me: string }) {
               {s.ready[them] ? `${themName} is ready. go?` : "i'm ready"}
             </button>
           )}
+        </div>
+      )}
+      {started && !done && !present && (
+        <div className={css.sheet}>
+          <p>both of you have to be in the game.</p>
+          <p className="tag dim">waiting for {themName} to join…</p>
         </div>
       )}
       {done && (

@@ -63,3 +63,13 @@ test("stuck and winner", () => {
   assert.equal(speed.winner(s), 1);
   assert.equal(rank(12), 12);
 });
+
+test("waiting: whoever has not tapped ready, then both", () => {
+  const p = ["a", "b"];
+  let s = speed.init();
+  assert.deepEqual(speed.waiting(s, p), ["a", "b"]);
+  s = speed.ready(s, 0);
+  assert.deepEqual(speed.waiting(s, p), ["b"]);
+  s = speed.ready(s, 1);
+  assert.deepEqual(speed.waiting(s, p), ["a", "b"]);
+});
